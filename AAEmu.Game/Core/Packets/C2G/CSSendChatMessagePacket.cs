@@ -45,9 +45,6 @@ namespace AAEmu.Game.Core.Packets.C2G
                 case ChatType.Shout:
                     // TODO ...
                     break;
-                case ChatType.Clan:
-                    Connection.ActiveChar.Expedition?.SendPacket(new SCChatMessagePacket(type, Connection.ActiveChar, message, ability, languageType));
-                    break;
                 case ChatType.Region:
                     WorldManager.Instance.BroadcastPacketToFaction(
                         new SCChatMessagePacket(type, Connection.ActiveChar, message, ability, languageType),

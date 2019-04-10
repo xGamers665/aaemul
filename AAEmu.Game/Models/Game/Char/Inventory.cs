@@ -307,22 +307,9 @@ namespace AAEmu.Game.Models.Game.Char
             return res;
         }
 
-        public bool CheckItems(uint templateId, int count) => CheckItems(SlotType.Inventory, templateId, count);
-
-        public bool CheckItems(SlotType slotType, uint templateId, int count)
+        public bool CheckItems(uint templateId, int count)
         {
-            Item[] items = null;
-            if (slotType == SlotType.Inventory)
-                items = Items;
-            else if (slotType == SlotType.Equipment)
-                items = Equip;
-            else if (slotType == SlotType.Bank)
-                items = Bank;
-
-            if (items == null)
-                return false;
-
-            foreach (var item in items)
+            foreach (var item in Items)
                 if (item != null && item.TemplateId == templateId)
                 {
                     count -= item.Count;
@@ -418,7 +405,7 @@ namespace AAEmu.Game.Models.Game.Char
 
         public bool TakeoffBackpack()
         {
-            var backpack = GetItem(SlotType.Equipment, (byte)EquipmentItemSlot.Backpack);
+            Item backpack = GetItem(SlotType.Equipment, (byte)EquipmentItemSlot.Backpack);
             if (backpack == null) return true;
 
             // Move to first available slot

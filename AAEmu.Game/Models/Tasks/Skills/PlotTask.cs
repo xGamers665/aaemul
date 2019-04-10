@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using AAEmu.Game.Core.Managers.Id;
 using AAEmu.Game.Models.Game.Skills;
 using AAEmu.Game.Models.Game.Skills.Plots;
@@ -14,10 +13,9 @@ namespace AAEmu.Game.Models.Tasks.Skills
         private readonly SkillCastTarget _targetCaster;
         private readonly PlotNextEvent _nextEvent;
         private readonly SkillObject _skillObject;
-        private readonly Dictionary<uint, int> _counter;
 
         public PlotTask(Skill skill, Unit caster, SkillCaster casterCaster, BaseUnit target, SkillCastTarget targetCaster,
-            SkillObject skillObject, PlotNextEvent nextEvent, Dictionary<uint, int> counter) : base(skill)
+            SkillObject skillObject, PlotNextEvent nextEvent) : base(skill)
         {
             _caster = caster;
             _casterCaster = casterCaster;
@@ -25,7 +23,6 @@ namespace AAEmu.Game.Models.Tasks.Skills
             _targetCaster = targetCaster;
             _skillObject = skillObject;
             _nextEvent = nextEvent;
-            _counter = counter;
         }
 
         public override void Execute()
@@ -47,8 +44,7 @@ namespace AAEmu.Game.Models.Tasks.Skills
             var res = true;
             if (step.Flag != 0)
                 foreach (var evnt in _nextEvent.Event.NextEvents)
-                    res = res && Skill.BuildPlot(_caster, _casterCaster, _target, _targetCaster, _skillObject, evnt,
-                              step, _counter);
+                    res = res && Skill.BuildPlot(_caster, _casterCaster, _target, _targetCaster, _skillObject, evnt, step);
             Skill.ParsePlot(_caster, _casterCaster, _target, _targetCaster, _skillObject, step);
             if (!res)
                 return;

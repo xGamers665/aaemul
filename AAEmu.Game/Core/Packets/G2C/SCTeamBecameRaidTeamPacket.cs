@@ -5,7 +5,7 @@ namespace AAEmu.Game.Core.Packets.G2C
 {
     public class SCTeamBecameRaidTeamPacket : GamePacket
     {
-        private readonly uint _teamId;
+        private uint _teamId;
 
         public SCTeamBecameRaidTeamPacket(uint teamId) : base(SCOffsets.SCTeamBecameRaidTeamPacket, 1)
         {

@@ -27,7 +27,7 @@ namespace AAEmu.Game.Scripts.Commands
                 return;
             }
 
-            ExpeditionManager.Instance.CreateExpedition(args[0], character.Connection);
+            ExpeditionManager.Instance.CreateExpedition(args[0], character);
         }
     }
 }
