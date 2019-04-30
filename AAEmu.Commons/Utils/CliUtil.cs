@@ -31,7 +31,7 @@ namespace AAEmu.Commons.Utils
 
         private static readonly string[] Credits = new string[]
         {
-            @"github.com/NL0bP/AAEmu",
+            @"This is AAEmu project. Created for players and developers.",
         };
 
         /// <summary>

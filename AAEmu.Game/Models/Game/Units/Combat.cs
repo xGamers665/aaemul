@@ -13,13 +13,13 @@ namespace AAEmu.Game.Models.Game.Units
         float distance = 1.5f;
         public override void Execute(Npc npc)
         {
-            //先判断距离
+            //先判断距离 / Judge the distance first
             bool move = false;
             float x = npc.Position.X - npc.CurrentTarget.Position.X;
             float y = npc.Position.Y - npc.CurrentTarget.Position.Y;
             float z = npc.Position.Z - npc.CurrentTarget.Position.Z;
             float MaxXYZ = Math.Max(Math.Max(Math.Abs(x), Math.Abs(y)), Math.Abs(z));
-            //如果最大值超过distance 则放弃攻击转而进行追踪
+            //如果最大值超过distance 则放弃攻击转而进行追踪 / If the maximum value exceeds distance, abandon the attack and track it
             if (MaxXYZ > distance)
             {
                 Track track = new Track();

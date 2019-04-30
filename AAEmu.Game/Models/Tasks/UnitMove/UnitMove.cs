@@ -8,7 +8,7 @@ namespace AAEmu.Game.Models.Tasks.UnitMove
         private readonly Patrol _patrol;
         private readonly Npc _npc;
         /// <summary>
-        /// 初始化任务
+        /// 初始化任务 / Initialization task
         /// </summary>
         /// <param name="caster"></param>
         public UnitMove(Patrol patrol, Npc npc)
@@ -17,7 +17,7 @@ namespace AAEmu.Game.Models.Tasks.UnitMove
             _npc = npc;
         }
         /// <summary>
-        /// 执行任务
+        /// 执行任务 / Perform tasks
         /// </summary>
         public override void Execute()
         {
