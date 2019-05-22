@@ -326,6 +326,12 @@ namespace AAEmu.Game.Core.Packets.G2C
                 stream.Write(effect.Index);
                 stream.Write(effect.Template.BuffId);
                 stream.Write(effect.SkillCaster);
+                /*
+                   stream.Write(ItemId);
+                   stream.Write(ItemTemplateId);
+                   stream.Write(Type1);
+                   stream.Write(Type2);
+                */
                 stream.Write(0u); // type(id)
                 stream.Write(effect.Caster.Level); // sourceLevel
                 stream.Write((short)1); // sourceAbLevel

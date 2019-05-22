@@ -32,7 +32,9 @@ namespace AAEmu.Game.Models.Game.NPChar
             {
                 var npc = Spawn(0);
                 if (npc != null)
+                {
                     list.Add(npc);
+                }
             }
 
             return list;
@@ -75,7 +77,9 @@ namespace AAEmu.Game.Models.Game.NPChar
             }
 
             if (_lastSpawn == null || _lastSpawn.ObjId == npc.ObjId)
+            {
                 _lastSpawn = _spawned.Count != 0 ? _spawned[_spawned.Count - 1] : null;
+            }
         }
 
         public void DecreaseCount(Npc npc)

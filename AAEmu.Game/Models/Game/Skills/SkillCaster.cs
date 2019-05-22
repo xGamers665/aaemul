@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using AAEmu.Commons.Network;
 
 namespace AAEmu.Game.Models.Game.Skills
@@ -24,7 +24,7 @@ namespace AAEmu.Game.Models.Game.Skills
 
         public override PacketStream Write(PacketStream stream)
         {
-            stream.Write((byte) Type);
+            stream.Write((byte)Type);
             stream.WriteBc(ObjId);
             return stream;
         }

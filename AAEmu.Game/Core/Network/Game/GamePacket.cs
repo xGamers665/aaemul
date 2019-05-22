@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Threading;
 using AAEmu.Commons.Network;
 using AAEmu.Commons.Utils;
@@ -45,10 +45,11 @@ namespace AAEmu.Game.Core.Network.Game
                 throw;
             }
 
-            if (!(TypeId == 0x013 && Level == 2) && 
-                !(TypeId == 0x016 && Level == 2) &&
-                !(TypeId == 0x066 && Level == 1) && 
-                !(TypeId == 0x068 && Level == 1))
+            // SC здесь можно установит фильтр на скрытие пакетов
+            if (!(TypeId == 0x013 && Level == 2) && // Pong
+                !(TypeId == 0x016 && Level == 2) && // FastPong
+                !(TypeId == 0x06B && Level == 1) && // SCUnitMovements
+                !(TypeId == 0x06C && Level == 1))   // SCOneUnitMovement
                 _log.Debug("GamePacket: S->C type {0:X}\n{1}", TypeId, ps);
 
             return ps;
@@ -56,9 +57,10 @@ namespace AAEmu.Game.Core.Network.Game
 
         public override PacketBase<GameConnection> Decode(PacketStream ps)
         {
-            if (!(TypeId == 0x012 && Level == 2) && 
-                !(TypeId == 0x015 && Level == 2) &&
-                !(TypeId == 0x089 && Level == 1))
+            // CS здесь можно установит фильтр на скрытие пакетов
+            if (!(TypeId == 0x012 && Level == 2) && // Ping
+                !(TypeId == 0x015 && Level == 2) && // FastPing
+                !(TypeId == 0x089 && Level == 1))   // CSMoveUnit
                 _log.Debug("GamePacket: C->S type {0:X}\n{1}", TypeId, ps);
 
             try

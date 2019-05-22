@@ -47,8 +47,8 @@ namespace AAEmu.Game.Models.Game.Units
         public Expedition Expedition { get; set; }
 
         /// <summary>
-        /// Unit巡逻 / Unit patrol
-        /// 指明Unit巡逻路线及速度、是否正在执行巡逻等行为 / Indicate Unit Patrol Route and Speed, Are Patrols Executing, etc.
+        /// Unit巡逻
+        /// 指明Unit巡逻路线及速度、是否正在执行巡逻等行为
         /// </summary>
         public Patrol Patrol { get; set; }
 
@@ -74,7 +74,10 @@ namespace AAEmu.Game.Models.Game.Units
         {
             Effects.RemoveEffectsOnDeath();
             BroadcastPacket(new SCUnitDeathPacket(ObjId, 1, killer), true);
-            BroadcastPacket(new SCLootableStatePacket(ObjId, true), true);
+            var lootDropItems = ItemManager.Instance.CreateLootDropItems(ObjId);
+            if (lootDropItems.Count > 0) { 
+                BroadcastPacket(new SCLootableStatePacket(ObjId, true), true);
+            }
             if (CurrentTarget!=null)
                 BroadcastPacket(new SCCombatClearedPacket(CurrentTarget.ObjId), true);
         }

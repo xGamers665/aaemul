@@ -1,4 +1,5 @@
 ﻿using AAEmu.Commons.Network;
+using AAEmu.Game.Core.Managers.Id;
 using AAEmu.Game.Core.Network.Game;
 
 namespace AAEmu.Game.Core.Packets.G2C
@@ -16,7 +17,7 @@ namespace AAEmu.Game.Core.Packets.G2C
 
         public override PacketStream Write(PacketStream stream)
         {
-            stream.Write(((ulong)_iId<<32)+65536);
+            stream.Write(((ulong)_iId<<32)+0x10000);
             stream.Write(_isLootable);
             return stream;
         }

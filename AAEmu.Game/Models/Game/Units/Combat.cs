@@ -8,7 +8,7 @@ using AAEmu.Game.Models.Game.Units.Route;
 
 namespace AAEmu.Game.Models.Game.Units
 {
-    class Combat:Patrol
+    internal class Combat : Patrol
     {
         float distance = 1.5f;
         public override void Execute(Npc npc)
@@ -22,7 +22,7 @@ namespace AAEmu.Game.Models.Game.Units
             //如果最大值超过distance 则放弃攻击转而进行追踪 / If the maximum value exceeds distance, abandon the attack and track it
             if (MaxXYZ > distance)
             {
-                Track track = new Track();
+                var track = new Track();
                 track.Pause(npc);
                 track.LastPatrol = LastPatrol;
                 LastPatrol = track;
@@ -34,19 +34,21 @@ namespace AAEmu.Game.Models.Game.Units
 
                 var skillId = 2u;
 
-                var skillCasterType = 0; // кто применяет
-                var skillCaster = SkillCaster.GetByType((SkillCasterType)skillCasterType);
+                var skillCasterType = SkillCasterType.Unit; // who applies / кто применяет
+                var skillCaster = SkillCaster.GetByType(skillCasterType);
                 skillCaster.ObjId = npc.ObjId;
 
-                var skillCastTargetType = 0; // на кого применяют
+                var skillCastTargetType = 0; // on whom apply / на кого применяют
                 var skillCastTarget = SkillCastTarget.GetByType((SkillCastTargetType)skillCastTargetType);
                 skillCastTarget.ObjId = npc.CurrentTarget.ObjId;
 
                 var flag = 0;
                 var flagType = flag & 15;
                 var skillObject = SkillObject.GetByType((SkillObjectType)flagType);
-                if (flagType > 0) skillObject.Flag = SkillObjectType.None;
-
+                if (flagType > 0)
+                {
+                    skillObject.Flag = SkillObjectType.None;
+                }
 
                 var skill = new Skill(SkillManager.Instance.GetSkillTemplate(skillId)); // TODO переделать...
                 skill.Use(npc, skillCaster, skillCastTarget, skillObject);

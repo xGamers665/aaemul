@@ -19,8 +19,7 @@ namespace AAEmu.Game.Utils.UID
 
         public uint Next()
         {
-            uint result;
-            if (_freeUidList.TryDequeue(out result))
+            if (_freeUidList.TryDequeue(out var result))
                 return result;
 
             return _nextUid++;

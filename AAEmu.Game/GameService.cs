@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -43,6 +43,7 @@ namespace AAEmu.Game
             HousingIdManager.Instance.Initialize();
             HousingTldManager.Instance.Initialize();
             TeamIdManager.Instance.Initialize();
+            DuelIdManager.Instance.Initialize(); // by NLObP
 
             ZoneManager.Instance.Load();
             WorldManager.Instance.Load();
@@ -89,6 +90,7 @@ namespace AAEmu.Game
             LoginNetwork.Instance.Start();
             stopWatch.Stop();
 
+            CashShopManager.Instance.Load();
             _log.Info("Server started! Took {0}", stopWatch.Elapsed);
 
             return Task.CompletedTask;

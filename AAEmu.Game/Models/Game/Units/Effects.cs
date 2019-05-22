@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using AAEmu.Game.Core.Managers;
 using AAEmu.Game.Models.Game.Skills;
@@ -306,23 +306,28 @@ namespace AAEmu.Game.Models.Game.Units
         {
             var own = GetOwner();
             if (own == null)
+            {
                 return;
-
+            }
             foreach (var e in new List<Effect>(_effects))
                 if (e != null /* && (e.Template.Skill == null || e.Template.Skill.Type != SkillTypes.Passive)*/)
+                {
                     e.Exit();
+                }
         }
 
         public void RemoveEffectsOnDeath()
         {
             var own = GetOwner();
             if (own == null)
+            {
                 return;
-
+            }
             foreach (var e in new List<Effect>(_effects))
-                if (e != null && (e.Template is BuffTemplate template && template.RemoveOnDeath ||
-                                  e.Template is BuffEffect effect && effect.Buff.RemoveOnDeath))
+                if (e != null && (e.Template is BuffTemplate template && template.RemoveOnDeath || e.Template is BuffEffect effect && effect.Buff.RemoveOnDeath))
+                {
                     e.Exit();
+                }
         }
 
         public void SetOwner(BaseUnit owner)
