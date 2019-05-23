@@ -43,12 +43,12 @@ namespace AAEmu.Game
             HousingIdManager.Instance.Initialize();
             HousingTldManager.Instance.Initialize();
             TeamIdManager.Instance.Initialize();
-            DuelIdManager.Instance.Initialize(); // by NLObP
 
             ZoneManager.Instance.Load();
             WorldManager.Instance.Load();
             QuestManager.Instance.Load();
 
+            ShipyardManager.Instance.Load();
             ShipyardManager.Instance.Load();
 
             FormulaManager.Instance.Load();
