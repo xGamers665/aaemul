@@ -1,4 +1,4 @@
-using AAEmu.Game.Models.Game.Faction;
+﻿using AAEmu.Game.Models.Game.Faction;
 using AAEmu.Game.Models.Game.Skills;
 using AAEmu.Game.Models.Game.World;
 
@@ -16,9 +16,7 @@ namespace AAEmu.Game.Models.Game.Units
     {
         public string Name { get; set; } = string.Empty;
         public SystemFaction Faction { get; set; }
-
         public virtual float Scale => 1f;
-        
         public Effects Effects { get; set; }
 
         public BaseUnit()

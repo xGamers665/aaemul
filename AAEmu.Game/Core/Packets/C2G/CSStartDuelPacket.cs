@@ -23,12 +23,14 @@ namespace AAEmu.Game.Core.Packets.C2G
 
             _log.Warn("StartDuel, Id: {0}, ErrorMessage: {1}", challengerId, errorMessage);
 
+            if (errorMessage != 0)
+            {
+                return;
+            }
+
             var challengedObjId = Connection.ActiveChar.ObjId;
             var challenger = WorldManager.Instance.GetCharacterById(challengerId);
             var challengerObjId = challenger.ObjId;
-
-            var challengerObjId2 = challenger.Position.X;
-
 
             Connection.ActiveChar.BroadcastPacket(new SCDuelStartedPacket(challengerObjId, challengedObjId), true);
             Connection.ActiveChar.BroadcastPacket(new SCAreaChatBubblePacket(true, Connection.ActiveChar.ObjId, 543), true);
@@ -51,7 +53,6 @@ namespace AAEmu.Game.Core.Packets.C2G
             Connection.SendPacket(new SCDoodadPhaseChangedPacket(doodadFlag.Last));
             Connection.SendPacket(new SCCombatEngagedPacket(challengerObjId));
             Connection.ActiveChar.BroadcastPacket(new SCCombatEngagedPacket(challengedObjId), false);
-
         }
     }
 }

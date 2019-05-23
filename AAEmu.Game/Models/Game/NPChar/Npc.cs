@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using AAEmu.Game.Core.Managers;
 using AAEmu.Game.Core.Managers.World;
 using AAEmu.Game.Core.Network.Game;
@@ -14,12 +14,10 @@ namespace AAEmu.Game.Models.Game.NPChar
     public class Npc : Unit
     {
         private static Logger _log = LogManager.GetCurrentClassLogger();
-
         public uint TemplateId { get; set; }
         public NpcTemplate Template { get; set; }
         public Item[] Equip { get; set; }
         public NpcSpawner Spawner { get; set; }
-
         public override UnitCustomModelParams ModelParams => Template.ModelParams;
         public override float Scale => Template.Scale;
 

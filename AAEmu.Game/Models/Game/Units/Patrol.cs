@@ -21,8 +21,10 @@ namespace AAEmu.Game.Models.Game.Units
         /// </summary>
         public bool Running { get; set; } = true;
         /// <summary>
-        /// 是否为循环 / Is it a cycle?
-        /// 默认为 True / Default is True
+        /// 是否为循环
+        /// Is it a cycle?
+        /// 默认为 True
+        /// Default is True
         /// </summary>
         public bool Loop { get; set; } = true;
         /// <summary>
@@ -109,7 +111,6 @@ namespace AAEmu.Game.Models.Game.Units
             {
                 TaskManager.Instance.Schedule(new UnitMove(patrol ?? this, npc), TimeSpan.FromMilliseconds(time));
             }
-               
         }
 
         public bool PauseAuto(Npc npc)
