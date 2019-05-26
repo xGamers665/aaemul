@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading;
 using AAEmu.Commons.Utils;
@@ -22,7 +22,6 @@ namespace AAEmu.Game.Core.Managers
         public TimeManager()
         {
             _observers = new List<IObserver<float>>();
-            ;
         }
 
         public IDisposable Subscribe(IObserver<float> observer)
@@ -30,7 +29,7 @@ namespace AAEmu.Game.Core.Managers
             if (_observers.Contains(observer))
                 return null;
             _observers.Add(observer);
-            
+
             return new Unsubscriber<float>(_observers, observer);
         }
 
@@ -44,7 +43,7 @@ namespace AAEmu.Game.Core.Managers
         {
             _time = 12 * 60 * 60;
             _work = true;
-            new Thread(Tick) {Name = "TimeManagerThread"}.Start();
+            new Thread(Tick) { Name = "TimeManagerThread" }.Start();
         }
 
         public void Stop()
@@ -60,7 +59,7 @@ namespace AAEmu.Game.Core.Managers
                 if (_time > MaxTime)
                     _time -= MaxTime;
 
-                new Thread(Push) {Name = "TimeManagerPushThread"}.Start();
+                new Thread(Push) { Name = "TimeManagerPushThread" }.Start();
                 Thread.Sleep(10000);
             }
         }

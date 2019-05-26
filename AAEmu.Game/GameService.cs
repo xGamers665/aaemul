@@ -24,8 +24,8 @@ namespace AAEmu.Game
             _log.Info("Starting daemon: AAEmu.Game");
 
             var stopWatch = new Stopwatch();
-
             stopWatch.Start();
+
             TaskIdManager.Instance.Initialize();
             TaskManager.Instance.Initialize();
 
@@ -88,9 +88,12 @@ namespace AAEmu.Game
             GameNetwork.Instance.Start();
             StreamNetwork.Instance.Start();
             LoginNetwork.Instance.Start();
-            stopWatch.Stop();
 
             CashShopManager.Instance.Load();
+
+            //DuelManager.Instance.Initialize();
+
+            stopWatch.Stop();
             _log.Info("Server started! Took {0}", stopWatch.Elapsed);
 
             return Task.CompletedTask;
