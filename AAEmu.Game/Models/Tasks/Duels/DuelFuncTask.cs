@@ -1,19 +1,19 @@
-﻿using AAEmu.Game.Models.Game.DoodadObj;
-using AAEmu.Game.Models.Game.Units;
+﻿using AAEmu.Game.Core.Network.Connections;
 
 namespace AAEmu.Game.Models.Tasks.Duels
 {
     public abstract class DuelFuncTask : Task
     {
-        protected Unit _caster;
-        protected Doodad _owner;
-        protected uint _skillId;
+        protected GameConnection _connection;
+        protected uint _challengerId;
+        protected uint _challengedId;
 
-        protected DuelFuncTask(Unit caster, Doodad owner, uint skillId)
+
+        protected DuelFuncTask(GameConnection connection, uint challengerId, uint challengedId)
         {
-            _caster = caster;
-            _owner = owner;
-            _skillId = skillId;
+            _connection = connection;
+            _challengerId = challengerId;
+            _challengedId = challengedId;
         }
     }
 }

@@ -23,7 +23,6 @@ namespace AAEmu.Game.Core.Packets.C2G
             }
 
             DuelManager.Instance.StartDuel(Connection, challengerId);
-
         }
     }
 }
