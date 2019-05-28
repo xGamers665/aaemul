@@ -26,7 +26,7 @@ namespace AAEmu.Game.Core.Managers
         private uint _funcGroupId;
         private byte _det;
         private const int _distance = 75; // square 75 meters
-        private const double _duelDuration = 5 * 60 *1000; // 5 min
+        private const double _duelDuration = 5 * 6 *1000; // 5 min
 
         public bool Initialise()
         {
@@ -91,8 +91,9 @@ namespace AAEmu.Game.Core.Managers
 
         public void StopDuel(GameConnection connection, uint challengerId, uint challengedId, uint challengerObjId, uint challengedObjId, uint flagObjId, byte det)
         {
-            // Duel is over, det 00=lose, 01=win, 02=surrender (Fled beyond the flag action border)
-            connection.ActiveChar.BroadcastPacket(new SCDuelEndedPacket(challengerId, challengedId, challengerObjId, challengedObjId, det), true);
+            // Duel is over, det 00=lose, 01=win, 02=surrender (Fled beyond the flag action border), 03=draw
+            connection.ActiveChar.BroadcastPacket(new SCDuelEndedPacket(challengedId, challengerId, challengedObjId, challengerObjId, det), false);
+            connection.SendPacket(new SCDuelEndedPacket(challengerId, challengedId, challengerObjId, challengedObjId, det));
 
             // Duel Status - Duel ended
             connection.ActiveChar.BroadcastPacket(new SCDuelStatePacket(challengerObjId, 0), true);

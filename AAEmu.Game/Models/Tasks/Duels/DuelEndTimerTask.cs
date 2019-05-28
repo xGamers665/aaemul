@@ -24,7 +24,7 @@ namespace AAEmu.Game.Models.Tasks.Duels
             ChallengerObjId = challengerObjId;
             ChallengedObjId = challengedObjId;
             FlagObjId = flagObjId;
-            Det = 1;
+            Det = 3;
         }
 
         public override async void Execute()
