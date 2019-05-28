@@ -92,8 +92,15 @@ namespace AAEmu.Game.Core.Managers
         public void StopDuel(GameConnection connection, uint challengerId, uint challengedId, uint challengerObjId, uint challengedObjId, uint flagObjId, byte det)
         {
             // Duel is over, det 00=lose, 01=win, 02=surrender (Fled beyond the flag action border), 03=draw
-            connection.ActiveChar.BroadcastPacket(new SCDuelEndedPacket(challengedId, challengerId, challengedObjId, challengerObjId, det), false);
-            connection.SendPacket(new SCDuelEndedPacket(challengerId, challengedId, challengerObjId, challengedObjId, det));
+            if (det == 3)
+            {
+                connection.ActiveChar.BroadcastPacket(new SCDuelEndedPacket(challengedId, challengerId, challengedObjId, challengerObjId, det), false);
+                connection.SendPacket(new SCDuelEndedPacket(challengerId, challengedId, challengerObjId, challengedObjId, det));
+            }
+            else
+            {
+                connection.ActiveChar.BroadcastPacket(new SCDuelEndedPacket(challengerId, challengedId, challengerObjId, challengedObjId, det), true);
+            }
 
             // Duel Status - Duel ended
             connection.ActiveChar.BroadcastPacket(new SCDuelStatePacket(challengerObjId, 0), true);
@@ -110,10 +117,11 @@ namespace AAEmu.Game.Core.Managers
         public bool DistanceСheckChallenged(GameConnection connection)
         {
             // проверяем, убежали от флага или нет
-            var x = Math.Abs(_combatFlag.Position.X - connection.ActiveChar.Position.X);
-            var y = Math.Abs(_combatFlag.Position.Y - connection.ActiveChar.Position.Y);
-            var z = Math.Abs(_combatFlag.Position.Z - connection.ActiveChar.Position.Z);
-            if (x >= _distance || y >= _distance || z >= _distance)
+            var x = _combatFlag.Position.X - connection.ActiveChar.Position.X;
+            var y = _combatFlag.Position.Y - connection.ActiveChar.Position.Y;
+            var z = _combatFlag.Position.Z - connection.ActiveChar.Position.Z;
+            var maxXYZ = Math.Max(Math.Max(Math.Abs(x), Math.Abs(y)), Math.Abs(z));
+            if (maxXYZ >= _distance)
             {
                 return true; // сдаемся, т.е. убежали от флага
             }
@@ -123,10 +131,11 @@ namespace AAEmu.Game.Core.Managers
         public bool DistanceСheckChallenger(GameConnection connection)
         {
             // проверяем, убежали от флага или нет
-            var x = Math.Abs(_combatFlag.Position.X - _challenger.Position.X);
-            var y = Math.Abs(_combatFlag.Position.Y - _challenger.Position.Y);
-            var z = Math.Abs(_combatFlag.Position.Z - _challenger.Position.Z);
-            if (x >= _distance || y >= _distance || z >= _distance)
+            var x = _combatFlag.Position.X - _challenger.Position.X;
+            var y = _combatFlag.Position.Y - _challenger.Position.Y;
+            var z = _combatFlag.Position.Z - _challenger.Position.Z;
+            var maxXYZ = Math.Max(Math.Max(Math.Abs(x), Math.Abs(y)), Math.Abs(z));
+            if (maxXYZ >= _distance)
             {
                 return true; // сдаемся, т.е. убежали от флага
             }
