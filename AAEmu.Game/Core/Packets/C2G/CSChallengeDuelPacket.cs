@@ -12,7 +12,7 @@ namespace AAEmu.Game.Core.Packets.C2G
 
         public override void Read(PacketStream stream)
         {
-            var challengedId = stream.ReadUInt32(); // Id who we challenged to a duel
+            var challengedId = stream.ReadUInt32(); // Id whom challenged to a duel
 
             var challengerId = Connection.ActiveChar.Id;
 

@@ -15,11 +15,11 @@ namespace AAEmu.Game.Core.Packets.C2G
         {
             var skillId = stream.ReadUInt32();
 
-            var skillCasterType = stream.ReadByte(); // кто применяет
+            var skillCasterType = stream.ReadByte(); // who applies
             var skillCaster = SkillCaster.GetByType((SkillCasterType)skillCasterType);
             skillCaster.Read(stream);
 
-            var skillCastTargetType = stream.ReadByte(); // на кого применяют
+            var skillCastTargetType = stream.ReadByte(); // on whom apply
             var skillCastTarget = SkillCastTarget.GetByType((SkillCastTargetType)skillCastTargetType);
             skillCastTarget.Read(stream);
 

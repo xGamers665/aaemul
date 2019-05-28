@@ -22,9 +22,11 @@ namespace AAEmu.Game.Core.Managers
         private uint _challengedObjId;
         private Character _challenger;
         private DoodadSpawner _combatFlag;
-        private int _delay;
+        private const double _delay = 1000; // 1 sec
         private uint _funcGroupId;
         private byte _det;
+        private const int _distance = 75; // square 75 meters
+        private const double _duelDuration = 5 * 60 *1000; // 5 min
 
         public bool Initialise()
         {
@@ -65,11 +67,10 @@ namespace AAEmu.Game.Core.Managers
 
             const uint NextPhase = 12830u;
             const uint SkillId = 0u;
-            _delay = 5 *60 * 1000; // Duel Duration 5 minutes
 
             // make the flag flutter in the wind
             _combatFlag.Last.FuncTask = new DoodadFuncGrowthTask(connection.ActiveChar, _combatFlag.Last, SkillId, NextPhase);
-            TaskManager.Instance.Schedule(_combatFlag.Last.FuncTask, TimeSpan.FromMilliseconds(3000));
+            TaskManager.Instance.Schedule(_combatFlag.Last.FuncTask, TimeSpan.FromMilliseconds(_delay));
 
             // after 5 minutes the flag is removed
             //_combatFlag.Last.FuncTask = new DoodadFuncFinalTask(connection.ActiveChar, _combatFlag.Last, SkillId, false);
@@ -81,12 +82,11 @@ namespace AAEmu.Game.Core.Managers
 
             var duel = new Duel();
             // final operations after a duel
-            duel.FuncTask = new DuelFuncTimerTask(duel, connection, _challengerId, _challengedId, _challengerObjId, _challengedObjId, _combatFlag.Last.ObjId, _det);
-            TaskManager.Instance.Schedule(duel.FuncTask, TimeSpan.FromMilliseconds(_delay));
+            duel.FuncTask = new DuelEndTimerTask(duel, connection, _challengerId, _challengedId, _challengerObjId, _challengedObjId, _combatFlag.Last.ObjId, _det);
+            TaskManager.Instance.Schedule(duel.FuncTask, TimeSpan.FromMilliseconds(_duelDuration));
 
-            _delay = 1000; // check every 1 sec
-            duel.FuncTask = new DuelFuncDistanceСheckTask(duel, connection, _challengerId, _challengedId, _challengerObjId, _challengedObjId, _combatFlag.Last.ObjId);
-            TaskManager.Instance.Schedule(duel.FuncTask, TimeSpan.FromMilliseconds(_delay));
+            duel.FuncTask = new DuelDistanceСheckTask(duel, connection, _challengerId, _challengedId, _challengerObjId, _challengedObjId, _combatFlag.Last.ObjId);
+            TaskManager.Instance.Schedule(duel.FuncTask, TimeSpan.FromMilliseconds(_delay), TimeSpan.FromMilliseconds(_delay));
         }
 
         public void StopDuel(GameConnection connection, uint challengerId, uint challengedId, uint challengerObjId, uint challengedObjId, uint flagObjId, byte det)
@@ -106,25 +106,31 @@ namespace AAEmu.Game.Core.Managers
             connection.ActiveChar.BroadcastPacket(new SCCombatClearedPacket(_challengedObjId), false);
         }
 
-        public sbyte DistanceСheck(GameConnection connection, uint challengerId, uint challengedId, uint challengerObjId, uint challengedObjId)
+        public bool DistanceСheckChallenged(GameConnection connection)
         {
+            // проверяем, убежали от флага или нет
             var x = Math.Abs(_combatFlag.Position.X - connection.ActiveChar.Position.X);
             var y = Math.Abs(_combatFlag.Position.Y - connection.ActiveChar.Position.Y);
             var z = Math.Abs(_combatFlag.Position.Z - connection.ActiveChar.Position.Z);
-            if (x >= 10 || y >= 10 || z >= 10)
+            if (x >= _distance || y >= _distance || z >= _distance)
             {
-                return 1;
+                return true; // сдаемся, т.е. убежали от флага
             }
 
-            var x2 = Math.Abs(_combatFlag.Position.X - _challenger.Position.X);
-            var y2 = Math.Abs(_combatFlag.Position.Y - _challenger.Position.Y);
-            var z2 = Math.Abs(_combatFlag.Position.Z - _challenger.Position.Z);
-            if (x2 >= 10 || y2 >= 10 || z2 >= 10)
+            return false;  // мы рядом с флагом
+        }
+        public bool DistanceСheckChallenger(GameConnection connection)
+        {
+            // проверяем, убежали от флага или нет
+            var x = Math.Abs(_combatFlag.Position.X - _challenger.Position.X);
+            var y = Math.Abs(_combatFlag.Position.Y - _challenger.Position.Y);
+            var z = Math.Abs(_combatFlag.Position.Z - _challenger.Position.Z);
+            if (x >= _distance || y >= _distance || z >= _distance)
             {
-                return -1;
+                return true; // сдаемся, т.е. убежали от флага
             }
 
-            return 0;
+            return false;  // мы рядом с флагом
         }
     }
 }
