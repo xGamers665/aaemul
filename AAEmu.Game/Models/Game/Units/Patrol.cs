@@ -156,7 +156,7 @@ namespace AAEmu.Game.Models.Game.Units
                     npc.Patrol = LastPatrol;
                     // 恢复上次巡航
                     // Resume last cruise
-                    Repet(npc, 100, LastPatrol);
+                    Repet(npc, 500, LastPatrol);
                 }
                 else
                 {
@@ -173,7 +173,7 @@ namespace AAEmu.Game.Models.Game.Units
                     line.Position = LastPatrol.PausePosition;
                     // 恢复上次巡航
                     // Resume last cruise
-                    Repet(npc, 100, line);
+                    Repet(npc, 500, line);
                 }
             }
         }
@@ -184,7 +184,7 @@ namespace AAEmu.Game.Models.Game.Units
             {
                 Count = 0;
                 Seq = 0;
-                Repet(npc,LoopDelay);
+                Repet(npc, LoopDelay);
             }
             else
             {

@@ -60,15 +60,19 @@ namespace AAEmu.Game.Models.Game.Units
 
         public virtual void ReduceCurrentHp(Unit attacker, int value)
         {
-            if (Hp == 0)
+            if (Hp <= 0)
                 return;
             Hp = Math.Max(Hp - value, 0);
-            if (Hp == 0) {
+            if (Hp <= 0)
+            {
                 DoDie(attacker);
-                //StopRegen();
-            } //else
-            //StartRegen();
-            BroadcastPacket(new SCUnitPointsPacket(ObjId, Hp, Hp>0 ? Mp : 0), true);
+                StopRegen();
+            }
+            else
+            {
+                //StartRegen();
+            }
+            BroadcastPacket(new SCUnitPointsPacket(ObjId, Hp, Hp > 0 ? Mp : 0), true);
         }
 
         public virtual void DoDie(Unit killer)
@@ -76,25 +80,35 @@ namespace AAEmu.Game.Models.Game.Units
             Effects.RemoveEffectsOnDeath();
             BroadcastPacket(new SCUnitDeathPacket(ObjId, 1, killer), true);
             var lootDropItems = ItemManager.Instance.CreateLootDropItems(ObjId);
-            if (lootDropItems.Count > 0) { 
+            if (lootDropItems.Count > 0)
+            {
                 BroadcastPacket(new SCLootableStatePacket(ObjId, true), true);
             }
-            if (CurrentTarget!=null)
+
+            if (CurrentTarget != null)
+            {
                 BroadcastPacket(new SCCombatClearedPacket(CurrentTarget.ObjId), true);
+            }
+
+            BroadcastPacket(new SCCombatClearedPacket(ObjId), true);
         }
 
         public void StartRegen()
         {
             if (_regenTask != null || (Hp >= MaxHp && Mp >= MaxMp) || Hp == 0)
+            {
                 return;
+            }
             _regenTask = new UnitPointsRegenTask(this);
             TaskManager.Instance.Schedule(_regenTask, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
         }
 
         public async void StopRegen()
         {
-            if(_regenTask == null)
+            if (_regenTask == null)
+            {
                 return;
+            }
             await _regenTask.Cancel();
             _regenTask = null;
         }
@@ -121,22 +135,37 @@ namespace AAEmu.Game.Models.Game.Units
         public override void RemoveBonus(uint bonusIndex, UnitAttribute attribute)
         {
             if (!Bonuses.ContainsKey(bonusIndex))
+            {
                 return;
+            }
             var bonuses = Bonuses[bonusIndex];
             foreach (var bonus in new List<Bonus>(bonuses))
+            {
                 if (bonus.Template != null && bonus.Template.Attribute == attribute)
+                {
                     bonuses.Remove(bonus);
+                }
+            }
         }
 
         public List<Bonus> GetBonuses(UnitAttribute attribute)
         {
             var result = new List<Bonus>();
             if (Bonuses == null)
+            {
                 return result;
+            }
             foreach (var bonuses in new List<List<Bonus>>(Bonuses.Values))
-            foreach (var bonus in new List<Bonus>(bonuses))
-                if (bonus.Template != null && bonus.Template.Attribute == attribute)
-                    result.Add(bonus);
+            {
+                foreach (var bonus in new List<Bonus>(bonuses))
+                {
+                    if (bonus.Template != null && bonus.Template.Attribute == attribute)
+                    {
+                        result.Add(bonus);
+                    }
+                }
+
+            }
             return result;
         }
     }

@@ -5,23 +5,27 @@ using AAEmu.Game.Core.Managers;
 using AAEmu.Game.Models.Game.NPChar;
 using AAEmu.Game.Models.Game.Skills;
 using AAEmu.Game.Models.Game.Units.Route;
+using AAEmu.Game.Utils;
 
 namespace AAEmu.Game.Models.Game.Units
 {
     internal class Combat : Patrol
     {
-        float distance = 1.5f;
+        float distance = 1.0f;
         public override void Execute(Npc npc)
         {
-            //先判断距离
-            //Judge the distance first
-            bool move = false;
-            float x = npc.Position.X - npc.CurrentTarget.Position.X;
-            float y = npc.Position.Y - npc.CurrentTarget.Position.Y;
-            float z = npc.Position.Z - npc.CurrentTarget.Position.Z;
-            float MaxXYZ = Math.Max(Math.Max(Math.Abs(x), Math.Abs(y)), Math.Abs(z));
-            //如果最大值超过distance 则放弃攻击转而进行追踪
-            //If the maximum value exceeds distance, abandon the attack and track it
+            // 先判断距离
+            // Judge the distance first
+            var move = false;
+            var x = npc.Position.X - npc.CurrentTarget.Position.X;
+            var y = npc.Position.Y - npc.CurrentTarget.Position.Y;
+            var z = npc.Position.Z - npc.CurrentTarget.Position.Z;
+            //var MaxXYZ = Math.Max(Math.Max(Math.Abs(x), Math.Abs(y)), Math.Abs(z));
+
+            var MaxXYZ = MathUtil.CalculateDistance(npc.Position, npc.CurrentTarget.Position, true);
+
+            // 如果最大值超过distance 则放弃攻击转而进行追踪
+            // If the maximum value exceeds distance, abandon the attack and track it
             if (MaxXYZ > distance)
             {
                 var track = new Track();
@@ -34,7 +38,7 @@ namespace AAEmu.Game.Models.Game.Units
             {
                 LoopDelay = 3000;
 
-                var skillId = 2u;
+                var skillId = 2u; // TODO
 
                 var skillCasterType = SkillCasterType.Unit; // who applies / кто применяет
                 var skillCaster = SkillCaster.GetByType(skillCasterType);

@@ -8,6 +8,7 @@ using AAEmu.Game.Models.Game.DoodadObj;
 using AAEmu.Game.Models.Game.Duels;
 using AAEmu.Game.Models.Tasks.Doodads;
 using AAEmu.Game.Models.Tasks.Duels;
+using AAEmu.Game.Utils;
 using NLog;
 
 namespace AAEmu.Game.Core.Managers
@@ -25,8 +26,8 @@ namespace AAEmu.Game.Core.Managers
         private const double _delay = 1000; // 1 sec
         private uint _funcGroupId;
         private byte _det;
-        private const int _distance = 75; // square 75 meters
-        private const double _duelDuration = 5 * 60 *1000; // 5 min
+        private const float DistanceForSurrender = 75;         // square 75 meters
+        private const double DuelDurationTime = 5 * 60 *1000; // 5 min
 
         public bool Initialise()
         {
@@ -83,7 +84,7 @@ namespace AAEmu.Game.Core.Managers
             var duel = new Duel();
             // final operations after a duel
             duel.FuncTask = new DuelEndTimerTask(duel, connection, _challengerId, _challengedId, _challengerObjId, _challengedObjId, _combatFlag.Last.ObjId, _det);
-            TaskManager.Instance.Schedule(duel.FuncTask, TimeSpan.FromMilliseconds(_duelDuration));
+            TaskManager.Instance.Schedule(duel.FuncTask, TimeSpan.FromMilliseconds(DuelDurationTime));
 
             duel.FuncTask = new DuelDistanceСheckTask(duel, connection, _challengerId, _challengedId, _challengerObjId, _challengedObjId, _combatFlag.Last.ObjId);
             TaskManager.Instance.Schedule(duel.FuncTask, TimeSpan.FromMilliseconds(_delay), TimeSpan.FromMilliseconds(_delay));
@@ -117,11 +118,8 @@ namespace AAEmu.Game.Core.Managers
         public bool DistanceСheckChallenged(GameConnection connection)
         {
             // проверяем, убежали от флага или нет
-            var x = _combatFlag.Position.X - connection.ActiveChar.Position.X;
-            var y = _combatFlag.Position.Y - connection.ActiveChar.Position.Y;
-            var z = _combatFlag.Position.Z - connection.ActiveChar.Position.Z;
-            var maxXYZ = Math.Max(Math.Max(Math.Abs(x), Math.Abs(y)), Math.Abs(z));
-            if (maxXYZ >= _distance)
+            var currentDistance = MathUtil.CalculateDistance(_combatFlag.Position, connection.ActiveChar.Position, true);
+            if(currentDistance >= DistanceForSurrender)
             {
                 return true; // сдаемся, т.е. убежали от флага
             }
@@ -131,11 +129,8 @@ namespace AAEmu.Game.Core.Managers
         public bool DistanceСheckChallenger(GameConnection connection)
         {
             // проверяем, убежали от флага или нет
-            var x = _combatFlag.Position.X - _challenger.Position.X;
-            var y = _combatFlag.Position.Y - _challenger.Position.Y;
-            var z = _combatFlag.Position.Z - _challenger.Position.Z;
-            var maxXYZ = Math.Max(Math.Max(Math.Abs(x), Math.Abs(y)), Math.Abs(z));
-            if (maxXYZ >= _distance)
+            var currentDistance = MathUtil.CalculateDistance(_combatFlag.Position, _challenger.Position, true);
+            if(currentDistance >= DistanceForSurrender)
             {
                 return true; // сдаемся, т.е. убежали от флага
             }

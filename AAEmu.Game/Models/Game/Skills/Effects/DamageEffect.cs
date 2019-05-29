@@ -67,10 +67,10 @@ namespace AAEmu.Game.Models.Game.Skills.Effects
         {
             _log.Debug("DamageEffect");
 
-            //if (!(target is Unit))
-            //{
-            //    return;
-            //}
+            if (!(target is Unit))
+            {
+                return;
+            }
 
             var trg = (Unit)target;
             var min = 0;
@@ -129,6 +129,16 @@ namespace AAEmu.Game.Models.Game.Skills.Effects
             {
                 dps += caster.RangedDps;
             }
+
+            if (dps <= 0) // TODO убрать этот костыль
+            {
+                dps = 15000f;
+            }
+            if (dpsInc <= 0)
+            {
+                dpsInc = 2000f;
+            }
+
             min += (int)((DpsMultiplier * dps * 0.001f + DpsIncMultiplier * dpsInc * 0.001f) * unk2 + 0.5f);
             max += (int)((DpsMultiplier * dps * 0.001f + DpsIncMultiplier * dpsInc * 0.001f) * unk2 + 0.5f);
             min = (int)(min * Multiplier);

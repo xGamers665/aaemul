@@ -5,13 +5,14 @@ using AAEmu.Game.Core.Packets.G2C;
 using AAEmu.Game.Models.Game.NPChar;
 using AAEmu.Game.Models.Game.Units.Movements;
 using AAEmu.Game.Models.Game.World;
+using AAEmu.Game.Utils;
 
 namespace AAEmu.Game.Models.Game.Units.Route
 {
     class Line : Patrol
     {
-        float distance = 0f;
-        float MovingDistance = 0.17f;
+        float distance = 1.0f;
+        float MovingDistance = 0.27f;
         public Point Position { get; set; } 
 
         public override void Execute(Npc npc)
@@ -106,15 +107,25 @@ namespace AAEmu.Game.Models.Game.Units.Route
             }
 
 
-            //模拟unit / Simulated unit
+            // 模拟unit
+            // Simulated unit
             var type = (MoveTypeEnum)1;
-            //返回moveType对象 / Return moveType object
+            
+            // 返回moveType对象
+            // Return moveType object
             var moveType = (UnitMoveType)MoveType.GetType(type);
 
             //改变NPC坐标 / Changing NPC coordinates
             moveType.X = npc.Position.X;
             moveType.Y = npc.Position.Y;
             moveType.Z = npc.Position.Z;
+
+            var angle = MathUtil.CalculateAngleFrom(npc.Position.X, npc.Position.Y, Position.X, Position.Y);
+            var rotZ = MathUtil.ConvertDegreeToDirection(angle);
+            moveType.RotationX = 0;
+            moveType.RotationY = 0;
+            moveType.RotationZ = rotZ;
+
             moveType.Flags = 5;
             moveType.DeltaMovement = new sbyte[3];
             moveType.DeltaMovement[0] = 0;
@@ -127,14 +138,16 @@ namespace AAEmu.Game.Models.Game.Units.Route
 
             if (move)
             {
-                //广播移动状态 / Broadcasting Mobile State
+                // 广播移动状态
+                // Broadcasting Mobile State
                 npc.BroadcastPacket(new SCOneUnitMovementPacket(npc.ObjId, moveType), true);
                 LoopDelay = 500;
                 Repet(npc);
             }
             else
             {
-                //停止移动 / Stop moving
+                // 停止移动
+                // Stop moving
                 moveType.DeltaMovement[1] = 0;
                 npc.BroadcastPacket(new SCOneUnitMovementPacket(npc.ObjId, moveType), true);
                 LoopAuto(npc);
