@@ -11,22 +11,16 @@ namespace AAEmu.Game.Models.Game.Units
 {
     internal class Combat : Patrol
     {
-        float distance = 1.0f;
+        readonly float _distanceFromPausePosition = 20f;
         public override void Execute(Npc npc)
         {
             // 先判断距离
             // Judge the distance first
-            var move = false;
-            var x = npc.Position.X - npc.CurrentTarget.Position.X;
-            var y = npc.Position.Y - npc.CurrentTarget.Position.Y;
-            var z = npc.Position.Z - npc.CurrentTarget.Position.Z;
-            //var MaxXYZ = Math.Max(Math.Max(Math.Abs(x), Math.Abs(y)), Math.Abs(z));
-
-            var MaxXYZ = MathUtil.CalculateDistance(npc.Position, npc.CurrentTarget.Position, true);
+            var distance = MathUtil.CalculateDistance(npc.Position, PausePosition, true);
 
             // 如果最大值超过distance 则放弃攻击转而进行追踪
             // If the maximum value exceeds distance, abandon the attack and track it
-            if (MaxXYZ > distance)
+            if (distance >= _distanceFromPausePosition)
             {
                 var track = new Track();
                 track.Pause(npc);

@@ -20,6 +20,7 @@ namespace AAEmu.Game.Models.Game.Units
         /// The default is False
         /// </summary>
         public bool Running { get; set; } = true;
+
         /// <summary>
         /// 是否为循环
         /// Is it a cycle?
@@ -27,16 +28,19 @@ namespace AAEmu.Game.Models.Game.Units
         /// Default is True
         /// </summary>
         public bool Loop { get; set; } = true;
+
         /// <summary>
         /// 循环间隔 毫秒
         /// Cyclic interval milliseconds
         /// </summary>
         public double LoopDelay { get; set; }
+
         /// <summary>
         /// 执行进度 0-100
         /// Progress of implementation 0-100
         /// </summary>
         public sbyte Step { get; set; }
+
         /// <summary>
         /// 中断 True
         /// Interrupt True
@@ -44,6 +48,7 @@ namespace AAEmu.Game.Models.Game.Units
         /// Whether or not to terminate a route, such as being attacked or changing one's own state by other acts
         /// </summary>
         public bool Interrupt { get; set; } = true;
+
         /// <summary>
         /// 执行顺序编号
         /// Execution Sequence Number
@@ -51,21 +56,25 @@ namespace AAEmu.Game.Models.Game.Units
         /// Each execution must increment the serial number, otherwise the action of repeating the serial number will not be executed.
         /// </summary>
         public uint Seq { get; set; } = 0;
+
         /// <summary>
         /// 当前执行次数
         /// Current execution times
         /// </summary>
         protected uint Count { get; set; } = 0;
+
         /// <summary>
         /// 暂停巡航点
         /// Suspension of cruise points
         /// </summary>
         protected Point PausePosition { get; set; }
+
         /// <summary>
         /// 上次任务
         /// Last mission
         /// </summary>
         public Patrol LastPatrol { get; set; }
+
         /// <summary>
         /// 放弃任务 / Abandon mission
         /// </summary>

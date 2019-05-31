@@ -14,18 +14,19 @@ namespace AAEmu.Game.Models.Game.Units.Route
         public override void Execute(Npc npc)
         {
             Interrupt = false;
-            bool move = false;
-            float x = npc.Position.X - npc.CurrentTarget.Position.X;
-            float y = npc.Position.Y - npc.CurrentTarget.Position.Y;
-            float z = npc.Position.Z - npc.CurrentTarget.Position.Z;
-            float MaxXYZ = Math.Max(Math.Max(Math.Abs(x), Math.Abs(y)), Math.Abs(z));
+            var move = false;
+            var dx = npc.Position.X - npc.CurrentTarget.Position.X;
+            var dy = npc.Position.Y - npc.CurrentTarget.Position.Y;
+            var dz = npc.Position.Z - npc.CurrentTarget.Position.Z;
+            //float Distance = Math.Max(Math.Max(Math.Abs(x), Math.Abs(y)), Math.Abs(z));
+            var Distance = MathUtil.CalculateDistance(npc.Position, npc.CurrentTarget.Position, true);
             float tempMovingDistance;
 
-            if (Math.Abs(x) > distance)
+            if (Math.Abs(dx) > distance)
             {
-                if (MaxXYZ != Math.Abs(x))
+                if (Distance != Math.Abs(dx))
                 {
-                    tempMovingDistance = Math.Abs(x) / (MaxXYZ / MovingDistance);
+                    tempMovingDistance = Math.Abs(dx) / (Distance / MovingDistance);
                 }
                 else
                 {
@@ -42,17 +43,17 @@ namespace AAEmu.Game.Models.Game.Units.Route
                 }
                 move = true;
             }
-            if (Math.Abs(y) > distance)
+            if (Math.Abs(dy) > distance)
             {
-                if (MaxXYZ != Math.Abs(y))
+                if (Distance != Math.Abs(dy))
                 {
-                    tempMovingDistance = Math.Abs(y) / (MaxXYZ / MovingDistance);
+                    tempMovingDistance = Math.Abs(dy) / (Distance / MovingDistance);
                 }
                 else
                 {
                     tempMovingDistance = MovingDistance;
                 }
-                if (y < 0)
+                if (dy < 0)
                 {
                     npc.Position.Y += tempMovingDistance;
                 }
@@ -62,11 +63,11 @@ namespace AAEmu.Game.Models.Game.Units.Route
                 }
                 move = true;
             }
-            if (Math.Abs(z) > distance)
+            if (Math.Abs(dz) > distance)
             {
-                if (MaxXYZ != Math.Abs(z))
+                if (Distance != Math.Abs(dz))
                 {
-                    tempMovingDistance = Math.Abs(z) / (MaxXYZ / MovingDistance);
+                    tempMovingDistance = Math.Abs(dz) / (Distance / MovingDistance);
                 }
                 else
                 {
@@ -83,14 +84,14 @@ namespace AAEmu.Game.Models.Game.Units.Route
                 move = true;
             }
 
-            if (Math.Max(Math.Max(Math.Abs(x), Math.Abs(y)), Math.Abs(z)) > 20)
+            if (Math.Max(Math.Max(Math.Abs(dx), Math.Abs(dy)), Math.Abs(dz)) > 20)
             {
                 move = false;
             }
 
             // 模拟unit
             // Simulated unit
-            var type = (MoveTypeEnum)1;
+            var type = MoveTypeEnum.Unit;
            
             // 返回moveType对象
             // Return moveType object
@@ -102,7 +103,8 @@ namespace AAEmu.Game.Models.Game.Units.Route
             moveType.Y = npc.Position.Y;
             moveType.Z = npc.Position.Z;
 
-            var angle = MathUtil.CalculateAngleFrom(npc, npc.CurrentTarget);
+            // смотрит в сторону движения
+            var angle = MathUtil.CalculateAngleFrom(npc.Position.X, npc.Position.Y, moveType.X, moveType.Y);
             var rotZ = MathUtil.ConvertDegreeToDirection(angle);
             moveType.RotationX = 0;
             moveType.RotationY = 0;
@@ -132,9 +134,11 @@ namespace AAEmu.Game.Models.Game.Units.Route
                 // Stop moving and prepare for attack if it is less than the gap
                 if (Math.Max(Math.Max(Math.Abs(x), Math.Abs(y)), Math.Abs(z)) <= distance)
                 {
-                    Combat combat = new Combat();
-                    combat.LastPatrol = LastPatrol;
-                    combat.LoopDelay = 2900;
+                    var combat = new Combat
+                    {
+                        LastPatrol = LastPatrol,
+                        LoopDelay = 2900
+                    };
                     combat.Pause(npc);
                     LastPatrol = combat;
                 }
@@ -158,13 +162,15 @@ namespace AAEmu.Game.Models.Game.Units.Route
             {
                 // 创建直线巡航回归上次巡航暂停点
                 // Create Linear Cruise Return to Last Cruise Stop Point
-                Line line = new Line();
-                
+
                 // 不可中断，不受外力及攻击影响 类似于处于脱战状态
                 // Uninterruptible, unaffected by external forces and attacks, similar to being out of combat
-                line.Interrupt = false;
-                line.Loop = false;
-                line.Abandon = false;
+                var line = new Line
+                {
+                    Interrupt = false,
+                    Loop = false,
+                    Abandon = false
+                };
                 line.Pause(npc);
                 LastPatrol = line;
             }
