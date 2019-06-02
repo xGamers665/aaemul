@@ -156,11 +156,10 @@ namespace AAEmu.Game.Models.Game.Skills.Effects
                     npc.CurrentTarget = caster;
                     npc.BroadcastPacket(new SCCombatEngagedPacket(caster.ObjId), true); // caster
                     npc.BroadcastPacket(new SCCombatEngagedPacket(npc.ObjId), true);    // target
-
                     npc.BroadcastPacket(new SCCombatFirstHitPacket(npc.ObjId, caster.ObjId, 0), true);
                     npc.BroadcastPacket(new SCAggroTargetChangedPacket(npc.ObjId, caster.ObjId), true);
-
                     npc.BroadcastPacket(new SCTargetChangedPacket(npc.ObjId, caster.ObjId), true);
+
                     TaskManager.Instance.Schedule(new UnitMove(new Track(), npc), TimeSpan.FromMilliseconds(100));
                 }
             }

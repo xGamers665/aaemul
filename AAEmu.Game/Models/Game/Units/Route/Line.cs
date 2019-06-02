@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using AAEmu.Game.Core.Managers.World;
 using AAEmu.Game.Core.Packets.G2C;
 using AAEmu.Game.Models.Game.NPChar;
 using AAEmu.Game.Models.Game.Units.Movements;
@@ -11,9 +12,9 @@ namespace AAEmu.Game.Models.Game.Units.Route
 {
     class Line : Patrol
     {
-        float distance = 1.0f;
+        float distance = 0f;
         float MovingDistance = 0.27f;
-        public Point Position { get; set; } 
+        public Point Position { get; set; }
 
         public override void Execute(Npc npc)
         {
@@ -26,15 +27,14 @@ namespace AAEmu.Game.Models.Game.Units.Route
             float x = npc.Position.X - Position.X;
             float y = npc.Position.Y - Position.Y;
             float z = npc.Position.Z - Position.Z;
-            //float Distance = Math.Max(Math.Max(Math.Abs(x), Math.Abs(y)), Math.Abs(z));
-            var Distance = MathUtil.CalculateDistance(npc.Position, npc.CurrentTarget.Position, true);
+            float MaxXYZ = Math.Max(Math.Max(Math.Abs(x), Math.Abs(y)), Math.Abs(z));
             float tempMovingDistance;
 
             if (Math.Abs(x) > distance)
             {
-                if (Distance != Math.Abs(x))
+                if (MaxXYZ != Math.Abs(x))
                 {
-                    tempMovingDistance = Math.Abs(x) / (Distance / MovingDistance);
+                    tempMovingDistance = Math.Abs(x) / (MaxXYZ / MovingDistance);
                     tempMovingDistance = Math.Min(tempMovingDistance, MovingDistance);
                 }
                 else
@@ -58,9 +58,9 @@ namespace AAEmu.Game.Models.Game.Units.Route
             }
             if (Math.Abs(y) > distance)
             {
-                if (Distance != Math.Abs(y))
+                if (MaxXYZ != Math.Abs(y))
                 {
-                    tempMovingDistance = Math.Abs(y) / (Distance / MovingDistance);
+                    tempMovingDistance = Math.Abs(y) / (MaxXYZ / MovingDistance);
                     tempMovingDistance = Math.Min(tempMovingDistance, MovingDistance);
                 }
                 else
@@ -83,9 +83,9 @@ namespace AAEmu.Game.Models.Game.Units.Route
             }
             if (Math.Abs(z) > distance)
             {
-                if (Distance != Math.Abs(z))
+                if (MaxXYZ != Math.Abs(z))
                 {
-                    tempMovingDistance = Math.Abs(z) / (Distance / MovingDistance);
+                    tempMovingDistance = Math.Abs(z) / (MaxXYZ / MovingDistance);
                     tempMovingDistance = Math.Min(tempMovingDistance, MovingDistance);
                 }
                 else
@@ -100,29 +100,28 @@ namespace AAEmu.Game.Models.Game.Units.Route
                 {
                     npc.Position.Z -= tempMovingDistance;
                 }
-                if(Math.Abs(z)< tempMovingDistance)
+                if (Math.Abs(z) < tempMovingDistance)
                 {
                     npc.Position.Z = Position.Z;
                 }
                 move = true;
             }
 
-
             // 模拟unit
-            // Simulated unit
-            var type = MoveTypeEnum.Unit;
-
+            // simulation unit
+            var type = (MoveTypeEnum)1;
             // 返回moveType对象
-            // Return moveType object
+            // return the moveType object
             var moveType = (UnitMoveType)MoveType.GetType(type);
 
-            //改变NPC坐标 / Changing NPC coordinates
+            // 改变NPC坐标
+            // Change the NPC coordinates
             moveType.X = npc.Position.X;
             moveType.Y = npc.Position.Y;
-            moveType.Z = npc.Position.Z;
+            moveType.Z = WorldManager.Instance.GetHeight(npc.Position.ZoneId, npc.Position.X, npc.Position.Y);
 
-            // смотрит в сторону движения
-            var angle = MathUtil.CalculateAngleFrom(npc.Position.X, npc.Position.Y, moveType.X, moveType.Y);
+            // looks in the direction of movement
+            var angle = MathUtil.CalculateAngleFrom(npc.Position.X, npc.Position.Y, Position.X, Position.Y);
             var rotZ = MathUtil.ConvertDegreeToDirection(angle);
             moveType.RotationX = 0;
             moveType.RotationY = 0;
@@ -137,11 +136,10 @@ namespace AAEmu.Game.Models.Game.Units.Route
             moveType.Alertness = 2;
             moveType.Time = Seq;
 
-
             if (move)
             {
                 // 广播移动状态
-                // Broadcasting Mobile State
+                // broadcast mobile status
                 npc.BroadcastPacket(new SCOneUnitMovementPacket(npc.ObjId, moveType), true);
                 LoopDelay = 500;
                 Repet(npc);
@@ -149,7 +147,7 @@ namespace AAEmu.Game.Models.Game.Units.Route
             else
             {
                 // 停止移动
-                // Stop moving
+                // stop moving
                 moveType.DeltaMovement[1] = 0;
                 npc.BroadcastPacket(new SCOneUnitMovementPacket(npc.ObjId, moveType), true);
                 LoopAuto(npc);

@@ -164,7 +164,6 @@ namespace AAEmu.Game.Models.Game.Units
                         result.Add(bonus);
                     }
                 }
-
             }
             return result;
         }

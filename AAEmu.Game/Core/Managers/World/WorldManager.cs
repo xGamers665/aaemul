@@ -114,7 +114,7 @@ namespace AAEmu.Game.Core.Managers.World
                     throw new Exception($"WorldManager: Parse {pathFile} file");
             }
 
-            var active = false;
+            var active = true;
             if (active) // TODO fastboot if active = false!
             {
                 _log.Info("Loading heightmaps...");

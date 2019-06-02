@@ -1,4 +1,5 @@
 ﻿using System;
+using AAEmu.Game.Core.Managers.World;
 using AAEmu.Game.Core.Packets.G2C;
 using AAEmu.Game.Models.Game.NPChar;
 using AAEmu.Game.Models.Game.Units.Movements;
@@ -9,24 +10,23 @@ namespace AAEmu.Game.Models.Game.Units.Route
 
     class Track : Patrol
     {
-        float distance = 1.0f;
+        float distance = 1.5f;
         float MovingDistance = 0.27f;
         public override void Execute(Npc npc)
         {
             Interrupt = false;
-            var move = false;
-            var dx = npc.Position.X - npc.CurrentTarget.Position.X;
-            var dy = npc.Position.Y - npc.CurrentTarget.Position.Y;
-            var dz = npc.Position.Z - npc.CurrentTarget.Position.Z;
-            //float Distance = Math.Max(Math.Max(Math.Abs(x), Math.Abs(y)), Math.Abs(z));
-            var Distance = MathUtil.CalculateDistance(npc.Position, npc.CurrentTarget.Position, true);
+            bool move = false;
+            float x = npc.Position.X - npc.CurrentTarget.Position.X;
+            float y = npc.Position.Y - npc.CurrentTarget.Position.Y;
+            float z = npc.Position.Z - npc.CurrentTarget.Position.Z;
+            float MaxXYZ = Math.Max(Math.Max(Math.Abs(x), Math.Abs(y)), Math.Abs(z));
             float tempMovingDistance;
 
-            if (Math.Abs(dx) > distance)
+            if (Math.Abs(x) > distance)
             {
-                if (Distance != Math.Abs(dx))
+                if (MaxXYZ != Math.Abs(x))
                 {
-                    tempMovingDistance = Math.Abs(dx) / (Distance / MovingDistance);
+                    tempMovingDistance = Math.Abs(x) / (MaxXYZ / MovingDistance);
                 }
                 else
                 {
@@ -43,17 +43,17 @@ namespace AAEmu.Game.Models.Game.Units.Route
                 }
                 move = true;
             }
-            if (Math.Abs(dy) > distance)
+            if (Math.Abs(y) > distance)
             {
-                if (Distance != Math.Abs(dy))
+                if (MaxXYZ != Math.Abs(y))
                 {
-                    tempMovingDistance = Math.Abs(dy) / (Distance / MovingDistance);
+                    tempMovingDistance = Math.Abs(y) / (MaxXYZ / MovingDistance);
                 }
                 else
                 {
                     tempMovingDistance = MovingDistance;
                 }
-                if (dy < 0)
+                if (y < 0)
                 {
                     npc.Position.Y += tempMovingDistance;
                 }
@@ -63,11 +63,11 @@ namespace AAEmu.Game.Models.Game.Units.Route
                 }
                 move = true;
             }
-            if (Math.Abs(dz) > distance)
+            if (Math.Abs(z) > distance)
             {
-                if (Distance != Math.Abs(dz))
+                if (MaxXYZ != Math.Abs(z))
                 {
-                    tempMovingDistance = Math.Abs(dz) / (Distance / MovingDistance);
+                    tempMovingDistance = Math.Abs(z) / (MaxXYZ / MovingDistance);
                 }
                 else
                 {
@@ -84,27 +84,23 @@ namespace AAEmu.Game.Models.Game.Units.Route
                 move = true;
             }
 
-            if (Math.Max(Math.Max(Math.Abs(dx), Math.Abs(dy)), Math.Abs(dz)) > 20)
+            if (Math.Max(Math.Max(Math.Abs(x), Math.Abs(y)), Math.Abs(z)) > 20)
             {
                 move = false;
             }
 
-            // 模拟unit
-            // Simulated unit
-            var type = MoveTypeEnum.Unit;
-           
-            // 返回moveType对象
-            // Return moveType object
+            //模拟unit
+            var type = (MoveTypeEnum)1;
+            //返回moveType对象
             var moveType = (UnitMoveType)MoveType.GetType(type);
 
-            // 改变NPC坐标
-            // Changing NPC coordinates
+            //改变NPC坐标
             moveType.X = npc.Position.X;
             moveType.Y = npc.Position.Y;
-            moveType.Z = npc.Position.Z;
+            moveType.Z = WorldManager.Instance.GetHeight(npc.Position.ZoneId, npc.Position.X, npc.Position.Y);
 
-            // смотрит в сторону движения
-            var angle = MathUtil.CalculateAngleFrom(npc.Position.X, npc.Position.Y, moveType.X, moveType.Y);
+            // looks in the direction of movement
+            var angle = MathUtil.CalculateAngleFrom(npc, npc.CurrentTarget);
             var rotZ = MathUtil.ConvertDegreeToDirection(angle);
             moveType.RotationX = 0;
             moveType.RotationY = 0;
@@ -119,26 +115,25 @@ namespace AAEmu.Game.Models.Game.Units.Route
             moveType.Alertness = 2;
             moveType.Time = Seq;
 
-            
+
             if (move)
             {
                 // 广播移动状态
-                // Broadcasting Mobile State
+                // Broadcast movement status
                 npc.BroadcastPacket(new SCOneUnitMovementPacket(npc.ObjId, moveType), true);
                 LoopDelay = 500;
                 Repet(npc);
             }
-            else{
+            else
+            {
 
                 // 如果小于差距则停止移动准备攻击
-                // Stop moving and prepare for attack if it is less than the gap
+                // Stop moving to prepare for attack if it is smaller than the gap
                 if (Math.Max(Math.Max(Math.Abs(x), Math.Abs(y)), Math.Abs(z)) <= distance)
                 {
-                    var combat = new Combat
-                    {
-                        LastPatrol = LastPatrol,
-                        LoopDelay = 2900
-                    };
+                    Combat combat = new Combat();
+                    combat.LastPatrol = LastPatrol;
+                    combat.LoopDelay = 2900;
                     combat.Pause(npc);
                     LastPatrol = combat;
                 }
@@ -151,26 +146,22 @@ namespace AAEmu.Game.Models.Game.Units.Route
                     npc.BroadcastPacket(new SCTargetChangedPacket(npc.ObjId, 0), true);
                 }
                 // 距离超过指定长度 放弃追踪 停止移动
-                // Abandon tracking to stop moving beyond specified length
+                // Distance exceeds the specified length Abandon Tracking Stop moving
                 moveType.DeltaMovement[1] = 0;
                 npc.BroadcastPacket(new SCOneUnitMovementPacket(npc.ObjId, moveType), true);
                 Stop(npc);
             }
 
-
             if (LastPatrol == null)
             {
                 // 创建直线巡航回归上次巡航暂停点
-                // Create Linear Cruise Return to Last Cruise Stop Point
-
+                // Create a straight cruise to return to the last cruise pause
+                Line line = new Line();
                 // 不可中断，不受外力及攻击影响 类似于处于脱战状态
-                // Uninterruptible, unaffected by external forces and attacks, similar to being out of combat
-                var line = new Line
-                {
-                    Interrupt = false,
-                    Loop = false,
-                    Abandon = false
-                };
+                // Uninterruptible, unaffected by external forces and attacks Similar to being in an off-war situation
+                line.Interrupt = false;
+                line.Loop = false;
+                line.Abandon = false;
                 line.Pause(npc);
                 LastPatrol = line;
             }

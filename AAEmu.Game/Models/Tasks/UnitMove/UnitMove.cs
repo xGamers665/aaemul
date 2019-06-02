@@ -12,13 +12,14 @@ namespace AAEmu.Game.Models.Tasks.UnitMove
         /// 初始化任务
         /// Initialization task
         /// </summary>
-        /// <param name="caster"></param>
+        /// <param name="patrol"></param>
         /// <param name="npc"></param>
         public UnitMove(Patrol patrol, Npc npc)
         {
             _patrol = patrol;
             _npc = npc;
         }
+
         /// <summary>
         /// 执行任务
         /// Perform tasks
