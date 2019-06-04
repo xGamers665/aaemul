@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using AAEmu.Game.Core.Managers;
 using AAEmu.Game.Core.Packets.G2C;
 using AAEmu.Game.Models.Game.NPChar;
@@ -14,13 +12,14 @@ namespace AAEmu.Game.Models.Game.Units
         float distance = 1.5f;
         public override void Execute(Npc npc)
         {
-            //先判断距离
-            bool move = false;
-            float x = npc.Position.X - npc.CurrentTarget.Position.X;
-            float y = npc.Position.Y - npc.CurrentTarget.Position.Y;
-            float z = npc.Position.Z - npc.CurrentTarget.Position.Z;
-            float MaxXYZ = Math.Max(Math.Max(Math.Abs(x), Math.Abs(y)), Math.Abs(z));
-            
+            // 先判断距离
+            // First judge the distance
+            var move = false;
+            var x = npc.Position.X - npc.CurrentTarget.Position.X;
+            var y = npc.Position.Y - npc.CurrentTarget.Position.Y;
+            var z = npc.Position.Z - npc.CurrentTarget.Position.Z;
+            var MaxXYZ = Math.Max(Math.Max(Math.Abs(x), Math.Abs(y)), Math.Abs(z));
+
             // If we are killed, the NPC goes to the place of spawn
             var trg = (Unit)npc.CurrentTarget;
             if (trg?.Hp <= 0)
@@ -47,10 +46,11 @@ namespace AAEmu.Game.Models.Game.Units
             }
             else
             {
-                //如果最大值超过distance 则放弃攻击转而进行追踪
+                // 如果最大值超过distance 则放弃攻击转而进行追踪
+                // If the maximum value exceeds distance, the attack is abandoned and the tracking is followed.
                 if (MaxXYZ > distance)
                 {
-                    Track track = new Track();
+                    var track = new Track();
                     track.Pause(npc);
                     track.LastPatrol = LastPatrol;
                     LastPatrol = track;

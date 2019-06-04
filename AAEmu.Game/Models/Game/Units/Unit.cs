@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using AAEmu.Game.Core.Managers;
 using AAEmu.Game.Core.Packets.G2C;
+using AAEmu.Game.Models.Game.Char;
 using AAEmu.Game.Models.Game.Expeditions;
 using AAEmu.Game.Models.Game.Skills;
 using AAEmu.Game.Models.Tasks;
@@ -78,19 +79,21 @@ namespace AAEmu.Game.Models.Game.Units
         public virtual void DoDie(Unit killer)
         {
             Effects.RemoveEffectsOnDeath();
-            BroadcastPacket(new SCUnitDeathPacket(ObjId, 1, killer), true);
+            killer.BroadcastPacket(new SCUnitDeathPacket(ObjId, 1, killer), true);
             var lootDropItems = ItemManager.Instance.CreateLootDropItems(ObjId);
             if (lootDropItems.Count > 0)
             {
-                BroadcastPacket(new SCLootableStatePacket(ObjId, true), true);
+                killer.BroadcastPacket(new SCLootableStatePacket(ObjId, true), true);
             }
 
             if (CurrentTarget != null)
             {
-                BroadcastPacket(new SCCombatClearedPacket(CurrentTarget.ObjId), true);
+                killer.BroadcastPacket(new SCCombatClearedPacket(killer.CurrentTarget.ObjId), true);
+                killer.BroadcastPacket(new SCCombatClearedPacket(killer.ObjId), true);
+                killer.CurrentTarget = null;
+                killer.StartRegen();
+                killer.BroadcastPacket(new SCTargetChangedPacket(killer.ObjId, 0), true);
             }
-
-            BroadcastPacket(new SCCombatClearedPacket(ObjId), true);
         }
 
         public void StartRegen()

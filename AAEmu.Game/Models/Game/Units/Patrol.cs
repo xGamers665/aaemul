@@ -114,7 +114,7 @@ namespace AAEmu.Game.Models.Game.Units
         /// <param name="npc"></param>
         /// <param name="time"></param>
         /// <param name="patrol"></param>
-        public void Repet(Npc npc,double time = 100,Patrol patrol=null)
+        public void Repet(Npc npc, double time = 100, Patrol patrol=null)
         {
             if(!(patrol ?? this).Abandon)
             {
@@ -131,6 +131,7 @@ namespace AAEmu.Game.Models.Game.Units
             }
             return false;
         }
+
         public void Pause(Npc npc)
         {
             Running = false;

@@ -15,11 +15,11 @@ namespace AAEmu.Game.Models.Game.Units.Route
         public override void Execute(Npc npc)
         {
             Interrupt = false;
-            bool move = false;
-            float x = npc.Position.X - npc.CurrentTarget.Position.X;
-            float y = npc.Position.Y - npc.CurrentTarget.Position.Y;
-            float z = npc.Position.Z - npc.CurrentTarget.Position.Z;
-            float MaxXYZ = Math.Max(Math.Max(Math.Abs(x), Math.Abs(y)), Math.Abs(z));
+            var move = false;
+            var x = npc.Position.X - npc.CurrentTarget.Position.X;
+            var y = npc.Position.Y - npc.CurrentTarget.Position.Y;
+            var z = npc.Position.Z - npc.CurrentTarget.Position.Z;
+            var MaxXYZ = Math.Max(Math.Max(Math.Abs(x), Math.Abs(y)), Math.Abs(z));
             float tempMovingDistance;
 
             if (Math.Abs(x) > distance)
@@ -131,7 +131,7 @@ namespace AAEmu.Game.Models.Game.Units.Route
                 // Stop moving to prepare for attack if it is smaller than the gap
                 if (Math.Max(Math.Max(Math.Abs(x), Math.Abs(y)), Math.Abs(z)) <= distance)
                 {
-                    Combat combat = new Combat();
+                    var combat = new Combat();
                     combat.LastPatrol = LastPatrol;
                     combat.LoopDelay = 2900;
                     combat.Pause(npc);
@@ -156,7 +156,7 @@ namespace AAEmu.Game.Models.Game.Units.Route
             {
                 // 创建直线巡航回归上次巡航暂停点
                 // Create a straight cruise to return to the last cruise pause
-                Line line = new Line();
+                var line = new Line();
                 // 不可中断，不受外力及攻击影响 类似于处于脱战状态
                 // Uninterruptible, unaffected by external forces and attacks Similar to being in an off-war situation
                 line.Interrupt = false;

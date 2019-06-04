@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using AAEmu.Game.Core.Managers.World;
 using AAEmu.Game.Core.Packets.G2C;
 using AAEmu.Game.Models.Game.NPChar;
@@ -23,11 +21,11 @@ namespace AAEmu.Game.Models.Game.Units.Route
                 Stop(npc);
                 return;
             }
-            bool move = false;
-            float x = npc.Position.X - Position.X;
-            float y = npc.Position.Y - Position.Y;
-            float z = npc.Position.Z - Position.Z;
-            float MaxXYZ = Math.Max(Math.Max(Math.Abs(x), Math.Abs(y)), Math.Abs(z));
+            var move = false;
+            var x = npc.Position.X - Position.X;
+            var y = npc.Position.Y - Position.Y;
+            var z = npc.Position.Z - Position.Z;
+            var MaxXYZ = Math.Max(Math.Max(Math.Abs(x), Math.Abs(y)), Math.Abs(z));
             float tempMovingDistance;
 
             if (Math.Abs(x) > distance)
