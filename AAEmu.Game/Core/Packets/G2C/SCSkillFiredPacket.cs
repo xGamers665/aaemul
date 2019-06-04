@@ -25,7 +25,7 @@ namespace AAEmu.Game.Core.Packets.G2C
             _skill = skill;
             _skillObject = skillObject;
         }
-        public SCSkillFiredPacket(uint id, ushort tl, SkillCaster caster, SkillCastTarget target, Skill skill, SkillObject skillObject, short effectDelay, int fireAnimId) : base(SCOffsets.SCSkillFiredPacket, 1)
+        public SCSkillFiredPacket(uint id, ushort tl, SkillCaster caster, SkillCastTarget target, Skill skill, SkillObject skillObject, short effectDelay=37, int fireAnimId=2) : base(SCOffsets.SCSkillFiredPacket, 1)
         {
             _id = id;
             _tl = tl;

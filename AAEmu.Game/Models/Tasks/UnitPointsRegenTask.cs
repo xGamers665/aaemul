@@ -15,7 +15,7 @@ namespace AAEmu.Game.Models.Tasks
 
         public override void Execute()
         {
-            if (_unit.Hp < _unit.MaxHp && _unit.Hp >= 0)
+            if (_unit.Hp < _unit.MaxHp && _unit.Hp > 0)
             {
                 _unit.Hp += _unit.HpRegen; // TODO at battle _unit.PersistentHpRegen
             }
@@ -23,6 +23,7 @@ namespace AAEmu.Game.Models.Tasks
             {
                 _unit.Mp += _unit.MpRegen; // TODO at battle _unit.PersistentMpRegen
             }
+
             _unit.Hp = Math.Min(_unit.Hp, _unit.MaxHp);
             _unit.Mp = Math.Min(_unit.Mp, _unit.MaxMp);
 

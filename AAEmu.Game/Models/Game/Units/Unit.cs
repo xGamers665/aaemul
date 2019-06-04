@@ -18,11 +18,11 @@ namespace AAEmu.Game.Models.Game.Units
         public int Hp { get; set; }
         public virtual int MaxHp { get; set; }
         public virtual int HpRegen { get; set; }
-        public virtual int PersistentHpRegen { get; set; }
+        public virtual int PersistentHpRegen { get; set; } = 30;
         public int Mp { get; set; }
         public virtual int MaxMp { get; set; }
         public virtual int MpRegen { get; set; }
-        public virtual int PersistentMpRegen { get; set; }
+        public virtual int PersistentMpRegen { get; set; } = 30;
         public virtual float LevelDps { get; set; }
         public virtual int Dps { get; set; }
         public virtual int DpsInc { get; set; }
@@ -43,8 +43,10 @@ namespace AAEmu.Game.Models.Game.Units
         public uint OwnerId { get; set; }
         public SkillTask SkillTask { get; set; }
         public Dictionary<uint, List<Bonus>> Bonuses { get; set; }
-
         public Expedition Expedition { get; set; }
+
+        public bool isInBattle { get; set; }
+
 
         /// <summary>
         /// Unit巡逻
@@ -57,6 +59,7 @@ namespace AAEmu.Game.Models.Game.Units
         public Unit()
         {
             Bonuses = new Dictionary<uint, List<Bonus>>();
+            isInBattle = false;
         }
 
         public virtual void ReduceCurrentHp(Unit attacker, int value)
@@ -71,7 +74,7 @@ namespace AAEmu.Game.Models.Game.Units
             }
             else
             {
-                //StartRegen();
+                StartRegen();
             }
             BroadcastPacket(new SCUnitPointsPacket(ObjId, Hp, Hp > 0 ? Mp : 0), true);
         }
@@ -93,6 +96,16 @@ namespace AAEmu.Game.Models.Game.Units
                 killer.CurrentTarget = null;
                 killer.StartRegen();
                 killer.BroadcastPacket(new SCTargetChangedPacket(killer.ObjId, 0), true);
+            }
+
+            if (killer is Character)
+            {
+                killer.isInBattle = false;
+            }
+            else
+            {
+                var chr = (Unit)killer.CurrentTarget;
+                chr.isInBattle = false;
             }
         }
 

@@ -366,7 +366,6 @@ namespace AAEmu.Game.Models.Game.Skills
 
         public void AutoAttack(uint skillId, Unit caster, SkillCaster casterCaster, SkillCastTarget targetCaster, SkillObject skillObject = null)
         {
-            caster.SkillTask = null;
             if (skillObject == null)
             {
                 skillObject = new SkillObject();
@@ -403,11 +402,13 @@ namespace AAEmu.Game.Models.Game.Skills
             // для skillId = 2
             var effectDelay = new Dictionary<int, short>
                 {
-                    {0, 37}, {1, 37}, {2, 37}, {3, 46}, {4, 46}, {5, 46}, {6, 35}, {7, 35}, {8, 46}, {9, 46}, {10, 46}, {11, 46}
+                    //{0, 37}, {1, 37}, {2, 37}, {3, 46}, {4, 46}, {5, 46}, {6, 35}, {7, 35}, {8, 46}, {9, 46}, {10, 46}, {11, 46}
+                    {0, 37}, {2, 35}
                 };
             var fireAnimId = new Dictionary<int, int>
                 {
-                    {0, 2},  {1, 2},  {2, 2},  {3, 3},  {4, 3},  {5, 3},  {6, 1},  {7, 1},  {8, 87}, {9, 87}, {10, 91}, {11, 92}
+                    //{0, 2},  {1, 2},  {2, 2},  {3, 3},  {4, 3},  {5, 3},  {6, 1},  {7, 1},  {8, 87}, {9, 87}, {10, 91}, {11, 92}
+                    {0, 2},  {2, 87}
                 };
             // 87 - удар наотмаш
             //  2 - удар сбоку
@@ -420,28 +421,13 @@ namespace AAEmu.Game.Models.Game.Skills
             // Create an object to generate numbers
             var rnd = new Random();
             // Get a random number (from 0 to n)
-            var value = rnd.Next(0, 11);
+            var value = rnd.Next(0, 1);
 
             TlId = (ushort)TlIdManager.Instance.GetNextId();
-            Id = 2;
 
             caster.BroadcastPacket(new SCSkillFiredPacket(skillId, TlId, casterCaster, targetCaster, this, skillObject, effectDelay[value], fireAnimId[value]), true);
 
-            if (Template.ChannelingTime > 0)
-            {
-                if (Template.ChannelingBuffId != 0)
-                {
-                    var buff = SkillManager.Instance.GetBuffTemplate(Template.ChannelingBuffId);
-                    buff.Apply(caster, casterCaster, target, targetCaster, new CastSkill(Template.Id, TlId), this, skillObject, DateTime.Now);
-                }
-
-                caster.SkillTask = new ChannelingTask(this, caster, casterCaster, target, targetCaster, skillObject);
-                TaskManager.Instance.Schedule(caster.SkillTask, TimeSpan.FromMilliseconds(Template.ChannelingTime));
-            }
-            else
-            {
-                Channeling(caster, casterCaster, target, targetCaster, skillObject);
-            }
+            Apply(caster, casterCaster, target, targetCaster, skillObject);
 
             var unit = (Unit)caster.CurrentTarget;
 

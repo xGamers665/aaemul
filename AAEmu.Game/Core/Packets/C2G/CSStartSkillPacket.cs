@@ -33,6 +33,9 @@ namespace AAEmu.Game.Core.Packets.C2G
             if (SkillManager.Instance.IsDefaultSkill(skillId) || SkillManager.Instance.IsCommonSkill(skillId))
             {
                 var skill = new Skill(SkillManager.Instance.GetSkillTemplate(skillId)); // TODO переделать...
+
+                Connection.ActiveChar.isInBattle = true;
+
                 if (skillId == 2 || skillId == 3 || skillId == 4)
                 {
                     skill.AutoAttack(skillId, Connection.ActiveChar, skillCaster, skillCastTarget, skillObject);
@@ -54,15 +57,7 @@ namespace AAEmu.Game.Core.Packets.C2G
             else if (Connection.ActiveChar.Skills.Skills.ContainsKey(skillId))
             {
                 var skill = Connection.ActiveChar.Skills.Skills[skillId];
-
-                if (skillId == 2)
-                {
-
-                }
-                else
-                {
-                    skill.Use(Connection.ActiveChar, skillCaster, skillCastTarget, skillObject);
-                }
+                skill.Use(Connection.ActiveChar, skillCaster, skillCastTarget, skillObject);
             }
             else
                 _log.Warn("StartSkill: Id {0}, undefined use type", skillId);
