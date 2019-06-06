@@ -34,7 +34,7 @@ namespace AAEmu.Game.Core.Packets.C2G
             {
                 var skill = new Skill(SkillManager.Instance.GetSkillTemplate(skillId)); // TODO переделать...
 
-                Connection.ActiveChar.isInBattle = true;
+                Connection.ActiveChar.IsInBattle = true;
 
                 if (skillId == 2 || skillId == 3 || skillId == 4)
                 {

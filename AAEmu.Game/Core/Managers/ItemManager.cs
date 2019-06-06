@@ -185,7 +185,7 @@ namespace AAEmu.Game.Core.Managers
             }
             else
             {
-                var item = ItemManager.Instance.Create(lootDropItem.TemplateId, count > lootDropItem.Count ? lootDropItem.Count : count, lootDropItem.Grade);
+                var item = ItemManager.Instance.Create(lootDropItem.TemplateId, count >= lootDropItem.Count ? lootDropItem.Count : count, lootDropItem.Grade);
                 InventoryHelper.AddItemAndUpdateClient(character, item);
             }
 

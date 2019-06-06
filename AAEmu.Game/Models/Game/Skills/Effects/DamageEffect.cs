@@ -145,11 +145,15 @@ namespace AAEmu.Game.Models.Game.Skills.Effects
             max = (int)(max * Multiplier);
             var value = Rand.Next(min, max);
             trg.ReduceCurrentHp(caster, value);
+            caster.SummarizeDamage += value;
             trg.BroadcastPacket(new SCUnitDamagedPacket(castObj, casterObj, caster.ObjId, target.ObjId, value), true);
-
+            if (trg is Npc)
+            {
+                trg.BroadcastPacket(new SCAiAggroPacket(trg.ObjId, 1, caster.ObjId, caster.SummarizeDamage), true);
+            }
             if (trg is Npc npc && npc.CurrentTarget != caster)
             {
-                npc.BroadcastPacket(new SCAiAggroPacket(npc.ObjId, 1, caster.ObjId), true);
+                //npc.BroadcastPacket(new SCAiAggroPacket(npc.ObjId, 1, caster.ObjId), true);
 
                 if (npc.Patrol == null || npc.Patrol.PauseAuto(npc))
                 {

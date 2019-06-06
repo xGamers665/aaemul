@@ -30,10 +30,10 @@ namespace AAEmu.Game.Models.Tasks.Skills
 
         }
 
-        public async void StopSkill(Unit unit)
+        public async void StopSkill(Unit caster)
         {
-            await unit.SkillTask.Cancel();
-            unit.SkillTask.Skill.Stop(unit);
+            await caster.SkillTask.Cancel();
+            caster.SkillTask.Skill.StopSkill();
         }
 
     }

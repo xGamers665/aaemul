@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using AAEmu.Game.Core.Managers;
+using AAEmu.Game.Core.Managers.Id;
 using AAEmu.Game.Core.Packets.G2C;
 using AAEmu.Game.Models.Game.Char;
 using AAEmu.Game.Models.Game.Expeditions;
@@ -42,11 +43,12 @@ namespace AAEmu.Game.Models.Game.Units
         public bool Invisible { get; set; }
         public uint OwnerId { get; set; }
         public SkillTask SkillTask { get; set; }
+        public SkillTask AutoAttackTask { get; set; }
         public Dictionary<uint, List<Bonus>> Bonuses { get; set; }
         public Expedition Expedition { get; set; }
 
-        public bool isInBattle { get; set; }
-
+        public bool IsInBattle { get; set; }
+        public int SummarizeDamage { get; set; }
 
         /// <summary>
         /// Unit巡逻
@@ -59,7 +61,7 @@ namespace AAEmu.Game.Models.Game.Units
         public Unit()
         {
             Bonuses = new Dictionary<uint, List<Bonus>>();
-            isInBattle = false;
+            IsInBattle = false;
         }
 
         public virtual void ReduceCurrentHp(Unit attacker, int value)
@@ -70,11 +72,11 @@ namespace AAEmu.Game.Models.Game.Units
             if (Hp <= 0)
             {
                 DoDie(attacker);
-                StopRegen();
+                //StopRegen();
             }
             else
             {
-                StartRegen();
+                //StartRegen();
             }
             BroadcastPacket(new SCUnitPointsPacket(ObjId, Hp, Hp > 0 ? Mp : 0), true);
         }
@@ -91,27 +93,26 @@ namespace AAEmu.Game.Models.Game.Units
 
             if (CurrentTarget != null)
             {
+                killer.BroadcastPacket(new SCAiAggroPacket(killer.ObjId, 0), true);
+                killer.SummarizeDamage = 0;
+
                 killer.BroadcastPacket(new SCCombatClearedPacket(killer.CurrentTarget.ObjId), true);
                 killer.BroadcastPacket(new SCCombatClearedPacket(killer.ObjId), true);
                 killer.CurrentTarget = null;
                 killer.StartRegen();
                 killer.BroadcastPacket(new SCTargetChangedPacket(killer.ObjId, 0), true);
             }
+        }
 
-            if (killer is Character)
-            {
-                killer.isInBattle = false;
-            }
-            else
-            {
-                var chr = (Unit)killer.CurrentTarget;
-                chr.isInBattle = false;
-            }
+        public async void StopAutoSkill(Unit unit)
+        {
+            await unit.AutoAttackTask.Cancel();
+            unit.AutoAttackTask = null;
         }
 
         public void StartRegen()
         {
-            if (_regenTask != null || (Hp >= MaxHp && Mp >= MaxMp) || Hp == 0)
+            if (_regenTask != null || Hp >= MaxHp && Mp >= MaxMp || Hp == 0)
             {
                 return;
             }

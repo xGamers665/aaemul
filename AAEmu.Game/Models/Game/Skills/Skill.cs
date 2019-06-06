@@ -388,7 +388,7 @@ namespace AAEmu.Game.Models.Game.Skills
                 caster.BroadcastPacket(new SCSkillStartedPacket(skillId, TlId, casterCaster, targetCaster, this, skillObject), true);
 
                 autoAttackTask = new MeleeCastTask(skillId, this, caster, casterCaster, target, targetCaster, skillObject);
-                TaskManager.Instance.Schedule(autoAttackTask, TimeSpan.FromMilliseconds(500), TimeSpan.FromMilliseconds(2000));
+                TaskManager.Instance.Schedule(autoAttackTask, TimeSpan.FromMilliseconds(500), TimeSpan.FromMilliseconds(1500));
             }
             else
             {
@@ -401,51 +401,62 @@ namespace AAEmu.Game.Models.Game.Skills
         {
             // для skillId = 2
             var effectDelay = new Dictionary<int, short>
-                {
-                    //{0, 37}, {1, 37}, {2, 37}, {3, 46}, {4, 46}, {5, 46}, {6, 35}, {7, 35}, {8, 46}, {9, 46}, {10, 46}, {11, 46}
-                    {0, 37}, {2, 35}
-                };
+            {
+                {0, 46}, {2, 35}
+            };
             var fireAnimId = new Dictionary<int, int>
-                {
-                    //{0, 2},  {1, 2},  {2, 2},  {3, 3},  {4, 3},  {5, 3},  {6, 1},  {7, 1},  {8, 87}, {9, 87}, {10, 91}, {11, 92}
-                    {0, 2},  {2, 87}
-                };
-            // 87 - удар наотмаш
-            //  2 - удар сбоку
-            //  3 - удар сверху (справа-налево)
-            //  1 - удар похож на 2 удар сбоку
+            {
+                {0, 3},  {2, 87}
+            };
+            var effectDelay2 = new Dictionary<int, short>
+            {
+                {0, 64}, {2, 64}
+            };
+            var fireAnimId2 = new Dictionary<int, int>
+            {
+                {0, 1},  {2, 2}
+            };
+            // 87 (35) - удар наотмаш, chr
+            //  2 (64) - удар сбоку, NPC
+            //  3 (46) - удар сверху (справа-налево), chr
+            //  1 (64) - удар похож на 2 удар сбоку, NPC
             // 91 - удар сверху (немного справа)
             // 92 - удар наотмашь слева вниз направо
             //  0 - удар не наносится (расстояние большое и надо подойти поближе), f=1, c=15
 
-            // Create an object to generate numbers
-            var rnd = new Random();
             // Get a random number (from 0 to n)
-            var value = rnd.Next(0, 1);
+            var value = Rand.Next(0, 1);
 
             TlId = (ushort)TlIdManager.Instance.GetNextId();
 
-            caster.BroadcastPacket(new SCSkillFiredPacket(skillId, TlId, casterCaster, targetCaster, this, skillObject, effectDelay[value], fireAnimId[value]), true);
-
-            Apply(caster, casterCaster, target, targetCaster, skillObject);
-
-            var unit = (Unit)caster.CurrentTarget;
-
-            if (unit?.Hp <= 0 || unit == null)
+            if (caster is Character)
             {
-                isStartAutoAttack = false; // turned off auto attack
-                StopSkill(caster);
-                Stop(caster);
+                caster.BroadcastPacket(new SCSkillFiredPacket(skillId, TlId, casterCaster, targetCaster, this, skillObject, effectDelay[value], fireAnimId[value]), true);
             }
             else
             {
+                caster.BroadcastPacket(new SCSkillFiredPacket(skillId, TlId, casterCaster, targetCaster, this, skillObject, effectDelay2[value], fireAnimId2[value]), true);
+            }
+
+            var npc = (Unit)caster.CurrentTarget;
+
+            if (npc?.Hp <= 0 || npc == null && isStartAutoAttack)
+            {
+                isStartAutoAttack = false; // turned off auto attack
+                StopSkill();
                 caster.BroadcastPacket(new SCSkillEndedPacket(TlId), true);
+                caster.BroadcastPacket(new SCSkillStoppedPacket(caster.ObjId, skillId), true);
+                caster.SkillTask = null;
                 TlIdManager.Instance.ReleaseId(TlId);
                 TlId = 0;
             }
+            else if(isStartAutoAttack)
+            {
+                Apply(caster, casterCaster, target, targetCaster, skillObject);
+            }
         }
 
-        public async void StopSkill(Unit unit)
+        public async void StopSkill()
         {
             await autoAttackTask.Cancel();
             autoAttackTask = null;
