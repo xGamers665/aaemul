@@ -33,23 +33,16 @@ namespace AAEmu.Game.Core.Packets.C2G
             if (SkillManager.Instance.IsDefaultSkill(skillId) || SkillManager.Instance.IsCommonSkill(skillId))
             {
                 var skill = new Skill(SkillManager.Instance.GetSkillTemplate(skillId)); // TODO переделать...
-
                 Connection.ActiveChar.IsInBattle = true;
-
-                if (skillId == 2 || skillId == 3 || skillId == 4)
-                {
-                    skill.AutoAttack(skillId, Connection.ActiveChar, skillCaster, skillCastTarget, skillObject);
-                }
-                else
-                {
-                    skill.Use(Connection.ActiveChar, skillCaster, skillCastTarget, skillObject);
-                }
+                skill.Use(Connection.ActiveChar, skillCaster, skillCastTarget, skillObject);
             }
             else if (skillCaster is SkillItem)
             {
                 var item = Connection.ActiveChar.Inventory.GetItem(((SkillItem)skillCaster).ItemId);
                 if (item == null || skillId != item.Template.UseSkillId)
+                {
                     return;
+                }
                 Connection.ActiveChar.Quests.OnItemUse(item);
                 var skill = new Skill(SkillManager.Instance.GetSkillTemplate(skillId));
                 skill.Use(Connection.ActiveChar, skillCaster, skillCastTarget, skillObject);
@@ -60,7 +53,9 @@ namespace AAEmu.Game.Core.Packets.C2G
                 skill.Use(Connection.ActiveChar, skillCaster, skillCastTarget, skillObject);
             }
             else
+            {
                 _log.Warn("StartSkill: Id {0}, undefined use type", skillId);
+            }
         }
     }
 }

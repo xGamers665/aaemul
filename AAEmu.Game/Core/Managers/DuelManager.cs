@@ -25,7 +25,7 @@ namespace AAEmu.Game.Core.Managers
         private DoodadSpawner _combatFlag;
         private const double _delay = 1000; // 1 sec
         private uint _funcGroupId;
-        private byte _det;
+        private byte _det = 0;
         private const float DistanceForSurrender = 75;         // square 75 meters
         private const double DuelDurationTime = 5 * 60 *1000; // 5 min
 

@@ -49,6 +49,9 @@ namespace AAEmu.Game.Models.Game.Units
 
         public bool IsInBattle { get; set; }
         public int SummarizeDamage { get; set; }
+        public bool IsAutoAttack = false;
+        public uint SkillId;
+        public ushort TlId { get; set; }
 
         /// <summary>
         /// Unit巡逻
@@ -98,16 +101,35 @@ namespace AAEmu.Game.Models.Game.Units
 
                 killer.BroadcastPacket(new SCCombatClearedPacket(killer.CurrentTarget.ObjId), true);
                 killer.BroadcastPacket(new SCCombatClearedPacket(killer.ObjId), true);
-                killer.CurrentTarget = null;
                 killer.StartRegen();
                 killer.BroadcastPacket(new SCTargetChangedPacket(killer.ObjId, 0), true);
+
+                if (killer is Character character)
+                {
+                    character.StopAutoSkill(character);
+                }
+                else
+                {
+                    killer.StopAutoSkill((Unit)killer.CurrentTarget);
+                }
+
+                killer.CurrentTarget = null;
             }
         }
 
-        public async void StopAutoSkill(Unit unit)
+        private async void StopAutoSkill(Unit character)
         {
-            await unit.AutoAttackTask.Cancel();
-            unit.AutoAttackTask = null;
+            if (!(character is Character) || character.AutoAttackTask == null)
+            {
+                return;
+            }
+
+            await character.AutoAttackTask.Cancel();
+            character.AutoAttackTask = null;
+            character.IsAutoAttack = false; // turned off auto attack
+            character.BroadcastPacket(new SCSkillEndedPacket(character.TlId), true);
+            character.BroadcastPacket(new SCSkillStoppedPacket(character.ObjId, character.SkillId), true);
+            TlIdManager.Instance.ReleaseId(character.TlId);
         }
 
         public void StartRegen()

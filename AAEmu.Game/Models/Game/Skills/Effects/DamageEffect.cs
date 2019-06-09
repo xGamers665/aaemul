@@ -62,8 +62,8 @@ namespace AAEmu.Game.Models.Game.Skills.Effects
 
         public override bool OnActionTime => false;
 
-        public override void Apply(Unit caster, SkillCaster casterObj, BaseUnit target, SkillCastTarget targetObj, CastAction castObj,
-            Skill skill, SkillObject skillObject, DateTime time)
+        public override void Apply(Unit caster, SkillCaster casterObj, BaseUnit target, SkillCastTarget targetObj,
+            CastAction castObj, Skill skill, SkillObject skillObject, DateTime time)
         {
             _log.Debug("DamageEffect");
 
@@ -132,11 +132,11 @@ namespace AAEmu.Game.Models.Game.Skills.Effects
 
             if (dps <= 0) // TODO убрать этот костыль
             {
-                dps = 15000f;
+                dps = 15000f * caster.Level;
             }
             if (dpsInc <= 0)
             {
-                dpsInc = 2000f;
+                dpsInc = 2000f * caster.Level;
             }
 
             min += (int)((DpsMultiplier * dps * 0.001f + DpsIncMultiplier * dpsInc * 0.001f) * unk2 + 0.5f);
