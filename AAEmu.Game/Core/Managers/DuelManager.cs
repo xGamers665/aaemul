@@ -70,12 +70,14 @@ namespace AAEmu.Game.Core.Managers
             const uint SkillId = 0u;
 
             // make the flag flutter in the wind
+            _combatFlag.Last.GrowthTime = DateTime.Now.AddMilliseconds(100);
             _combatFlag.Last.FuncTask = new DoodadFuncGrowthTask(connection.ActiveChar, _combatFlag.Last, SkillId, NextPhase);
-            TaskManager.Instance.Schedule(_combatFlag.Last.FuncTask, TimeSpan.FromMilliseconds(_delay));
+            TaskManager.Instance.Schedule(_combatFlag.Last.FuncTask, TimeSpan.FromMilliseconds(100));
 
             // after 5 minutes the flag is removed
+            //_combatFlag.Last.GrowthTime = DateTime.Now.AddMilliseconds(DuelDurationTime);
             //_combatFlag.Last.FuncTask = new DoodadFuncFinalTask(connection.ActiveChar, _combatFlag.Last, SkillId, false);
-            //TaskManager.Instance.Schedule(_combatFlag.Last.FuncTask, TimeSpan.FromMilliseconds(_delay));
+            //TaskManager.Instance.Schedule(_combatFlag.Last.FuncTask, TimeSpan.FromMilliseconds(DuelDurationTime));
 
             // Player can be attacked
             connection.SendPacket(new SCCombatEngagedPacket(_challengerObjId));

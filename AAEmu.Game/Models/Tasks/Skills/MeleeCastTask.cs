@@ -16,7 +16,6 @@ namespace AAEmu.Game.Models.Tasks.Skills
 
         public MeleeCastTask(Skill skill, Unit caster, SkillCaster casterCaster, BaseUnit target, SkillCastTarget targetCaster, SkillObject skillObject) : base(skill)
         {
-            //_skillId = skillId;
             _caster = caster;
             _casterCaster = casterCaster;
             _target = target;
@@ -26,14 +25,7 @@ namespace AAEmu.Game.Models.Tasks.Skills
 
         public override void Execute()
         {
-            //Skill.Melee(_skillId, _caster, _casterCaster, _target, _targetCaster, _skillObject);
             Skill.Cast(_caster, _casterCaster, _target, _targetCaster, _skillObject);
         }
-
-        //public async void StopSkill(Unit caster)
-        //{
-        //    await caster.SkillTask.Cancel();
-        //    caster.SkillTask.Skill.StopSkill();
-        //}
     }
 }

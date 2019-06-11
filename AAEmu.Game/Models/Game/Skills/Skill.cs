@@ -41,15 +41,14 @@ namespace AAEmu.Game.Models.Game.Skills
             Id = template.Id;
             Template = template;
             Level = 1;
-            //autoAttackTask = null;
         }
 
         public void Use(Unit caster, SkillCaster casterCaster, SkillCastTarget targetCaster, SkillObject skillObject = null)
         {
             //if (caster is Character chr)
             //{
-            //    var currentDistance = MathUtil.CalculateDistance(chr.Position, chr.CurrentTarget.Position, true);
-            //    if (currentDistance > SkillManager.Instance.GetSkillTemplate(Id).MaxRange)
+            //    var dist = MathUtil.CalculateDistance(chr.Position, chr.CurrentTarget.Position, true);
+            //    if (dist > SkillManager.Instance.GetSkillTemplate(Id).MaxRange)
             //    {
             //        chr.SendMessage("Target is too far ...");
             //        return;
@@ -268,7 +267,7 @@ namespace AAEmu.Game.Models.Game.Skills
                     caster.BroadcastPacket(new SCSkillStartedPacket(Id, TlId, casterCaster, targetCaster, this, skillObject), true);
 
                     caster.AutoAttackTask = new MeleeCastTask(this, caster, casterCaster, target, targetCaster, skillObject);
-                    TaskManager.Instance.Schedule(caster.AutoAttackTask, TimeSpan.FromMilliseconds(300), TimeSpan.FromMilliseconds(2000));
+                    TaskManager.Instance.Schedule(caster.AutoAttackTask, TimeSpan.FromMilliseconds(300), TimeSpan.FromMilliseconds(1300));
                 }
                 else
                 {
@@ -377,23 +376,22 @@ namespace AAEmu.Game.Models.Game.Skills
 
                 // Get a random number (from 0 to n)
                 var value = Rand.Next(0, 1);
-                value = Rand.Next(0, 1);
                 // для skillId = 2
                 // 87 (35) - удар наотмаш, chr
-                //  2 (89) - удар сбоку, NPC
-                //  3 (46) - удар сверху (справа-налево), chr
-                //  1 (90) - удар похож на 2 удар сбоку, NPC
+                //  2 (00) - удар сбоку, NPC
+                //  3 (46) - удар сбоку, chr
+                //  1 (00) - удар похож на 2 удар сбоку, NPC
                 // 91 - удар сверху (немного справа)
                 // 92 - удар наотмашь слева вниз направо
                 //  0 - удар не наносится (расстояние большое и надо подойти поближе), f=1, c=15
                 var effectDelay = new Dictionary<int, short> { { 0, 46 }, { 1, 35 } };
                 var fireAnimId = new Dictionary<int, int> { { 0, 3 }, { 1, 87 } };
-                var effectDelay2 = new Dictionary<int, short> { { 0, 90 }, { 1, 89 } };
+                var effectDelay2 = new Dictionary<int, short> { { 0, 0 }, { 1, 0 } };
                 var fireAnimId2 = new Dictionary<int, int> { { 0, 1 }, { 1, 2 } };
 
                 var trg = (Unit)target;
-                var currentDistance = MathUtil.CalculateDistance(caster.Position, trg.Position, true);
-                if (currentDistance <= SkillManager.Instance.GetSkillTemplate(Id).MaxRange)
+                var dist = MathUtil.CalculateDistance(caster.Position, trg.Position, true);
+                if (dist >= SkillManager.Instance.GetSkillTemplate(Id).MinRange && dist <= SkillManager.Instance.GetSkillTemplate(Id).MaxRange)
                 {
                     caster.BroadcastPacket(caster is Character
                             ? new SCSkillFiredPacket(Id, TlId, casterCaster, targetCaster, this, skillObject, effectDelay[value], fireAnimId[value])
@@ -434,91 +432,8 @@ namespace AAEmu.Game.Models.Game.Skills
             {
                 Channeling(caster, casterCaster, target, targetCaster, skillObject);
             }
-            //}
-            //else
-            //{
-            //    _log.Warn("StartSkill: Id {0}, too far from the destination", Id);
-            //    caster.BroadcastPacket(new SCAccountWarnedPacket(2, "too far from the destination ..."), true);
-
-            //}
-
         }
 
-        //        public void MeleeAttack(uint skillId, Unit caster, SkillCaster casterCaster, BaseUnit target, SkillCastTarget targetCaster, SkillObject skillObject = null)
-        //        {
-        //            if (!caster.IsAutoAttack)
-        //            {
-        //                caster.IsAutoAttack = true; // enable auto attack
-        //                caster.BroadcastPacket(new SCSkillStartedPacket(skillId, TlId, casterCaster, targetCaster, this, skillObject), true);
-
-        //                caster.AutoAttackTask = new MeleeCastTask(skillId, this, caster, casterCaster, target, targetCaster, skillObject);
-        //                TaskManager.Instance.Schedule(caster.AutoAttackTask, TimeSpan.FromMilliseconds(500), TimeSpan.FromMilliseconds(1500));
-        //            }
-        //            else
-        //            {
-        //                Melee(skillId, caster, casterCaster, target, targetCaster, skillObject);
-
-        //                _log.Warn("SCSkillStartedPacket: already sent. Id = {0}", skillId);
-        //            }
-        //        }
-        //        public void Melee(uint skillId, Unit caster, SkillCaster casterCaster, BaseUnit target, SkillCastTarget targetCaster, SkillObject skillObject)
-        //        {
-        //            // для skillId = 2
-        //            var effectDelay = new Dictionary<int, short>
-        //            {
-        //                {0, 46}, {2, 35}
-        //            };
-        //            var fireAnimId = new Dictionary<int, int>
-        //            {
-        //                {0, 3},  {2, 87}
-        //            };
-        //            var effectDelay2 = new Dictionary<int, short>
-        //            {
-        //                {0, 64}, {2, 64}
-        //            };
-        //            var fireAnimId2 = new Dictionary<int, int>
-        //            {
-        //                {0, 1},  {2, 2}
-        //            };
-        //            // 87 (35) - удар наотмаш, chr
-        //            //  2 (64) - удар сбоку, NPC
-        //            //  3 (46) - удар сверху (справа-налево), chr
-        //            //  1 (64) - удар похож на 2 удар сбоку, NPC
-        //            // 91 - удар сверху (немного справа)
-        //            // 92 - удар наотмашь слева вниз направо
-        //            //  0 - удар не наносится (расстояние большое и надо подойти поближе), f=1, c=15
-
-        //            // Get a random number (from 0 to n)
-        //            var value = Rand.Next(0, 1);
-
-        //            //TlId = (ushort)TlIdManager.Instance.GetNextId();
-
-        //            if (caster is Character)
-        //            {
-        //                caster.BroadcastPacket(new SCSkillFiredPacket(skillId, TlId, casterCaster, targetCaster, this, skillObject, effectDelay[value], fireAnimId[value]), true);
-        //            }
-        //            else
-        //            {
-        //                caster.BroadcastPacket(new SCSkillFiredPacket(skillId, TlId, casterCaster, targetCaster, this, skillObject, effectDelay2[value], fireAnimId2[value]), true);
-        //            }
-
-        //            var npc = (Unit)caster.CurrentTarget;
-
-        //            if (npc?.Hp <= 0 || npc == null && isAutoAttack)
-        //            {
-        //                isAutoAttack = false; // turned off auto attack
-        //                StopSkill(caster);
-        //                caster.BroadcastPacket(new SCSkillEndedPacket(TlId), true);
-        //                caster.BroadcastPacket(new SCSkillStoppedPacket(caster.ObjId, skillId), true);
-        //                caster.SkillTask = null;
-        //                TlIdManager.Instance.ReleaseId(TlId);
-        //                //TlId = 0;
-        //            }
-        //            else if (isAutoAttack)
-        //            {
-        //                Apply(caster, casterCaster, target, targetCaster, skillObject);
-        //            }
-        //        }
         public async void StopSkill(Unit caster)
         {
             await caster.AutoAttackTask.Cancel();
@@ -691,10 +606,10 @@ namespace AAEmu.Game.Models.Game.Skills
             TlIdManager.Instance.ReleaseId(TlId);
             //TlId = 0;
 
-            if (Template.CastingTime > 0)
-            {
-                caster.BroadcastPacket(new SCSkillStoppedPacket(caster.ObjId, Template.Id), true);
-            }
+            //if (Template.CastingTime > 0)
+            //{
+            //    caster.BroadcastPacket(new SCSkillStoppedPacket(caster.ObjId, Template.Id), true);
+            //}
         }
 
         public void Stop(Unit caster)
