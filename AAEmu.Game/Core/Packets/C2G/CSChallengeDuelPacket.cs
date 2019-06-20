@@ -1,4 +1,5 @@
 ﻿using AAEmu.Commons.Network;
+using AAEmu.Game.Core.Managers;
 using AAEmu.Game.Core.Network.Game;
 using AAEmu.Game.Core.Packets.G2C;
 
@@ -12,13 +13,11 @@ namespace AAEmu.Game.Core.Packets.C2G
 
         public override void Read(PacketStream stream)
         {
-            var challengedId = stream.ReadUInt32(); // Id whom challenged to a duel
+            var challengedId = stream.ReadUInt32(); // Id кого вызываем на дуэль
+            var challengerId = Connection.ActiveChar.Id; // это тот кто вызвал на дуэль
 
-            var challengerId = Connection.ActiveChar.Id;
-
-            Connection.ActiveChar.BroadcastPacket(new SCDuelChallengedPacket(challengerId), false); // we send only to the enemy
-
-            _log.Warn("ChallengeDuel, challengerId: {0}, challengedId: {0}", challengerId, challengedId);
+            _log.Warn("CSChallengeDuelPacket: challengerId = {0}, challengedId = {1}", challengerId, challengedId);
+            DuelManager.Instance.DuelRequest(Connection.ActiveChar, challengedId); // посылаем свой Id
         }
     }
 }

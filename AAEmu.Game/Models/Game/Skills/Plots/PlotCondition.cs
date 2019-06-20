@@ -1,5 +1,6 @@
-using AAEmu.Game.Core.Managers;
+﻿using AAEmu.Game.Core.Managers;
 using AAEmu.Game.Models.Game.Units;
+using AAEmu.Game.Utils;
 
 namespace AAEmu.Game.Models.Game.Skills.Plots
 {
@@ -18,8 +19,8 @@ namespace AAEmu.Game.Models.Game.Skills.Plots
             switch (Kind)
             {
                 case PlotConditionType.Distance:
-                    //var dist = MathUtil.CalculateDistance(caster.Position, target.Position);
-                    var dist = 10;
+                    var dist = MathUtil.CalculateDistance(caster.Position, target.Position);
+                    //var dist = 10;
                     res = dist >= Param1 && dist <= Param2;
                     break;
                 case PlotConditionType.BuffTag:

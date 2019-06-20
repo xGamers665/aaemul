@@ -29,9 +29,6 @@ namespace AAEmu.Game.Models.Game.Skills
         public byte Level { get; set; }
         public ushort TlId { get; set; }
 
-        //public bool isAutoAttack;
-        //public SkillTask autoAttackTask;
-
         public Skill()
         {
         }
@@ -45,16 +42,6 @@ namespace AAEmu.Game.Models.Game.Skills
 
         public void Use(Unit caster, SkillCaster casterCaster, SkillCastTarget targetCaster, SkillObject skillObject = null)
         {
-            //if (caster is Character chr)
-            //{
-            //    var dist = MathUtil.CalculateDistance(chr.Position, chr.CurrentTarget.Position, true);
-            //    if (dist > SkillManager.Instance.GetSkillTemplate(Id).MaxRange)
-            //    {
-            //        chr.SendMessage("Target is too far ...");
-            //        return;
-            //    }
-            //}
-
             if (skillObject == null)
             {
                 skillObject = new SkillObject();
@@ -243,6 +230,7 @@ namespace AAEmu.Game.Models.Game.Skills
                 }
 
                 ParsePlot(caster, casterCaster, target, targetCaster, skillObject, step);
+
                 if (!res)
                 {
                     return;
@@ -265,9 +253,8 @@ namespace AAEmu.Game.Models.Game.Skills
                     caster.SkillId = Id;
                     caster.TlId = TlId;
                     caster.BroadcastPacket(new SCSkillStartedPacket(Id, TlId, casterCaster, targetCaster, this, skillObject), true);
-
                     caster.AutoAttackTask = new MeleeCastTask(this, caster, casterCaster, target, targetCaster, skillObject);
-                    TaskManager.Instance.Schedule(caster.AutoAttackTask, TimeSpan.FromMilliseconds(300), TimeSpan.FromMilliseconds(1300));
+                    TaskManager.Instance.Schedule(caster.AutoAttackTask, TimeSpan.FromMilliseconds(300), TimeSpan.FromMilliseconds(2000));
                 }
                 else
                 {
@@ -314,6 +301,7 @@ namespace AAEmu.Game.Models.Game.Skills
             step.Flag = 2;
             step.Casting = nextEvent.Casting;
             step.Channeling = nextEvent.Channeling;
+
             foreach (var condition in nextEvent.Event.Conditions)
             {
                 if (condition.Condition.Check(caster, casterCaster, target, targetCaster, skillObject))
@@ -354,7 +342,8 @@ namespace AAEmu.Game.Models.Game.Skills
 
             var time = (ushort)(step.Flag != 0 ? step.Delay / 10 : 0);
             var unkId = step.Casting || step.Channeling ? caster.ObjId : 0;
-            caster.BroadcastPacket(new SCPlotEventPacket(TlId, step.Event.Id, Template.Id, caster.ObjId, target.ObjId, unkId, time, step.Flag), true);
+
+            caster.BroadcastPacket(new SCPlotEventPacket(caster, TlId, step.Event.Id, Template.Id, caster.ObjId, target.ObjId, unkId, time, step.Flag, step.Event.Position), true);
 
             foreach (var st in step.Steps)
             {
@@ -375,18 +364,18 @@ namespace AAEmu.Game.Models.Game.Skills
                 }
 
                 // Get a random number (from 0 to n)
-                var value = Rand.Next(0, 1);
+                var value = 1; //Rand.Next(0, 1);
                 // для skillId = 2
                 // 87 (35) - удар наотмаш, chr
-                //  2 (00) - удар сбоку, NPC
+                //  2 (37) - удар сбоку, NPC
                 //  3 (46) - удар сбоку, chr
-                //  1 (00) - удар похож на 2 удар сбоку, NPC
+                //  1 (35) - удар похож на 2 удар сбоку, NPC
                 // 91 - удар сверху (немного справа)
                 // 92 - удар наотмашь слева вниз направо
                 //  0 - удар не наносится (расстояние большое и надо подойти поближе), f=1, c=15
                 var effectDelay = new Dictionary<int, short> { { 0, 46 }, { 1, 35 } };
                 var fireAnimId = new Dictionary<int, int> { { 0, 3 }, { 1, 87 } };
-                var effectDelay2 = new Dictionary<int, short> { { 0, 0 }, { 1, 0 } };
+                var effectDelay2 = new Dictionary<int, short> { { 0, 35 }, { 1, 37 } };
                 var fireAnimId2 = new Dictionary<int, int> { { 0, 1 }, { 1, 2 } };
 
                 var trg = (Unit)target;
@@ -606,10 +595,10 @@ namespace AAEmu.Game.Models.Game.Skills
             TlIdManager.Instance.ReleaseId(TlId);
             //TlId = 0;
 
-            //if (Template.CastingTime > 0)
-            //{
-            //    caster.BroadcastPacket(new SCSkillStoppedPacket(caster.ObjId, Template.Id), true);
-            //}
+            if (Template.CastingTime > 0)
+            {
+                caster.BroadcastPacket(new SCSkillStoppedPacket(caster.ObjId, Template.Id), true);
+            }
         }
 
         public void Stop(Unit caster)

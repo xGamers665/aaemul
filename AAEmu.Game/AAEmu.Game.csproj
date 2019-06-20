@@ -36,6 +36,8 @@
     
     <ItemGroup>
       <Compile Remove="Core\Packets\C2G\CSLootItemTookPacket.cs" />
+      <Compile Remove="Models\Tasks\Duels\DuelFuncTask.cs" />
+      <Compile Remove="Models\Tasks\Duels\DuelWaitAnswerTask.cs" />
     </ItemGroup>
 
     <ItemGroup>

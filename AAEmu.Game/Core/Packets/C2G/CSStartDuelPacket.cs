@@ -1,6 +1,8 @@
 ﻿using AAEmu.Commons.Network;
 using AAEmu.Game.Core.Managers;
+using AAEmu.Game.Core.Managers.World;
 using AAEmu.Game.Core.Network.Game;
+using AAEmu.Game.Models.Game.Chat;
 
 namespace AAEmu.Game.Core.Packets.C2G
 {
@@ -13,16 +15,18 @@ namespace AAEmu.Game.Core.Packets.C2G
         public override void Read(PacketStream stream)
         {
             var challengerId = stream.ReadUInt32();  // ID the one who called us to a duel
-            var errorMessage = stream.ReadInt16();  // 0 - accepted a duel, 507 - refused
+            var errorMessage = stream.ReadInt16();  // 0 = "NoErrorMessage" - accepted a duel, 507 = "TargetRejectedDuel" - refused duel
 
-            _log.Warn("StartDuel, Id: {0}, ErrorMessage: {1}", challengerId, errorMessage);
+            _log.Warn("CSStartDuelPacket: challengerId = {0}", challengerId);
 
-            if (errorMessage != 0)  // refused to duel
+            if (errorMessage == 0)
             {
-                return;
+                DuelManager.Instance.DuelAccepted(Connection.ActiveChar, challengerId);
             }
-
-            DuelManager.Instance.StartDuel(Connection, challengerId);
+            else
+            {
+                DuelManager.Instance.DuelCancel(challengerId, (ErrorMessageType)errorMessage);
+            }
         }
     }
 }

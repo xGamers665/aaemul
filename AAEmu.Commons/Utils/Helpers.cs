@@ -216,6 +216,12 @@ namespace AAEmu.Commons.Utils
                 .ToArray();
         }
 
+        public static string ByteArrayToString(byte[] data)
+        {
+            var hex = BitConverter.ToString(data);
+            return hex.Replace("-", "");
+        }
+
         public static byte[] ConvertIp(string ip)
         {
             var result = IPAddress.Parse(ip);

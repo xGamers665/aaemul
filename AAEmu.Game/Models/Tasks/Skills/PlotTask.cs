@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using AAEmu.Game.Core.Managers.Id;
 using AAEmu.Game.Models.Game.Skills;
 using AAEmu.Game.Models.Game.Skills.Plots;
@@ -46,14 +46,17 @@ namespace AAEmu.Game.Models.Tasks.Skills
 
             var res = true;
             if (step.Flag != 0)
+            {
                 foreach (var evnt in _nextEvent.Event.NextEvents)
-                    res = res && Skill.BuildPlot(_caster, _casterCaster, _target, _targetCaster, _skillObject, evnt,
-                              step, _counter);
+                {
+                    res = res && Skill.BuildPlot(_caster, _casterCaster, _target, _targetCaster, _skillObject, evnt, step, _counter);
+                }
+            }
             Skill.ParsePlot(_caster, _casterCaster, _target, _targetCaster, _skillObject, step);
             if (!res)
                 return;
             TlIdManager.Instance.ReleaseId(Skill.TlId);
-            Skill.TlId = 0;
+            //Skill.TlId = 0;
         }
     }
 }

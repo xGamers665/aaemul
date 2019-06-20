@@ -4,52 +4,32 @@ using AAEmu.Game.Models.Game.Duels;
 
 namespace AAEmu.Game.Models.Tasks.Duels
 {
-    public class DuelDistanceСheckTask : DuelFuncTask
+    public class DuelDistanceСheckTask : Task
     {
-        protected Duel Owner;
-        protected GameConnection Connection;
-        protected uint ChallengerId;
-        protected uint ChallengedId;
-        protected uint ChallengerObjId;
-        protected uint ChallengedObjId;
-        protected uint FlagObjId;
-        protected byte Det;
+        protected Duel _duel;
+        protected uint _challengerId;
+        protected uint _challengedId;
 
-        public DuelDistanceСheckTask(Duel owner, GameConnection connection, uint challengerId, uint challengedId, uint challengerObjId, uint challengedObjId, uint flagObjId) : base(connection, challengerId, challengedId)
+        public DuelDistanceСheckTask(Duel duel)
         {
-            Owner = owner;
-            Connection = connection;
-            ChallengerId = challengerId;
-            ChallengedId = challengedId;
-            ChallengerObjId = challengerObjId;
-            ChallengedObjId = challengedObjId;
-            FlagObjId = flagObjId;
-            Owner = owner;
+            _duel = duel;
+            _challengerId = duel.Challenger.Id;
+            _challengedId = duel.Challenged.Id;
         }
 
-        public override async void Execute()
+        public override void Execute()
         {
-            var Challenger = DuelManager.Instance.DistanceСheckChallenger(Connection);
-            var Challenged = DuelManager.Instance.DistanceСheckChallenged(Connection);
-
-            if (!Challenger && !Challenged)
-            {
+            if(_duel.DuelDistanceСheckTask == null)
                 return;
-            }
 
-            Det = 2; // surrender
-            if (Owner.FuncTask != null)
+            var res = DuelManager.Instance.DistanceСheck(_challengerId);
+            if (res == DuelDistance.ChallengerFar)
             {
-                await Owner.FuncTask.Cancel();
-                Owner.FuncTask = null;
+                DuelManager.Instance.DuelStop(_challengedId, DuelDetType.Surrender, _challengerId);
             }
-            if (Challenged)
+            else if (res == DuelDistance.ChallengedFar)
             {
-                DuelManager.Instance.StopDuel(Connection, ChallengerId, ChallengedId, ChallengerObjId, ChallengedObjId, FlagObjId, Det);
-            }
-            if (Challenger)
-            {
-                DuelManager.Instance.StopDuel(Connection, ChallengedId, ChallengerId, ChallengedObjId, ChallengerObjId, FlagObjId, Det);
+                DuelManager.Instance.DuelStop(_challengerId, DuelDetType.Surrender, _challengedId);
             }
         }
     }

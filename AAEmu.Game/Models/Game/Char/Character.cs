@@ -87,21 +87,16 @@ namespace AAEmu.Game.Models.Game.Char
         public int Expirience { get; set; }
         public int RecoverableExp { get; set; }
         public DateTime Updated { get; set; }
-
         public uint ReturnDictrictId { get; set; }
         public uint ResurrectionDictrictId { get; set; }
-
         public override UnitCustomModelParams ModelParams { get; set; }
         public override float Scale => 1f;
         public override byte RaceGender => (byte)(16 * (byte)Gender + (byte)Race);
-
         public CharacterVisualOptions VisualOptions { get; set; }
-
         public ActionSlot[] Slots { get; set; }
         public Inventory Inventory { get; set; }
         public byte NumInventorySlots { get; set; }
         public short NumBankSlots { get; set; }
-
         public Item[] BuyBack { get; set; }
         public BondDoodad Bonding { get; set; }
         public CharacterQuests Quests { get; set; }
@@ -112,14 +107,13 @@ namespace AAEmu.Game.Models.Game.Char
         public CharacterFriends Friends { get; set; }
         public CharacterBlocked Blocked { get; set; }
         public CharacterMates Mates { get; set; }
-
         public byte ExpandedExpert { get; set; }
         public CharacterActability Actability { get; set; }
-
         public CharacterSkills Skills { get; set; }
         public CharacterCraft Craft { get; set; }
+        public int AccessLevel { get; set; }
 
-        public int AccessLevel { get; set;}
+        public Item Item { get; set; }  // Item который используется персонажем в каких либо действиях
 
         private bool _inParty;
         private bool _isOnline;
@@ -144,7 +138,7 @@ namespace AAEmu.Game.Models.Game.Char
                 if (_isOnline == value) return;
                 // TODO - GUILD STATUS CHANGE
                 FriendMananger.Instance.SendStatusChange(this, true, value);
-                if(!value) TeamManager.Instance.SetOffline(this);
+                if (!value) TeamManager.Instance.SetOffline(this);
                 _isOnline = value;
             }
         }
@@ -156,7 +150,7 @@ namespace AAEmu.Game.Models.Game.Char
             get
             {
                 var formula = FormulaManager.Instance.GetUnitFormula(FormulaOwnerType.Character, UnitFormulaKind.Str);
-                var parameters = new Dictionary<string, double> {["level"] = Level};
+                var parameters = new Dictionary<string, double> { ["level"] = Level };
                 var result = formula.Evaluate(parameters);
                 var res = (int)result;
                 foreach (var item in Inventory.Equip)
@@ -179,7 +173,7 @@ namespace AAEmu.Game.Models.Game.Char
             get
             {
                 var formula = FormulaManager.Instance.GetUnitFormula(FormulaOwnerType.Character, UnitFormulaKind.Dex);
-                var parameters = new Dictionary<string, double> {["level"] = Level};
+                var parameters = new Dictionary<string, double> { ["level"] = Level };
                 var res = (int)formula.Evaluate(parameters);
                 foreach (var item in Inventory.Equip)
                     if (item is EquipItem equip)
@@ -201,7 +195,7 @@ namespace AAEmu.Game.Models.Game.Char
             get
             {
                 var formula = FormulaManager.Instance.GetUnitFormula(FormulaOwnerType.Character, UnitFormulaKind.Sta);
-                var parameters = new Dictionary<string, double> {["level"] = Level};
+                var parameters = new Dictionary<string, double> { ["level"] = Level };
                 var res = (int)formula.Evaluate(parameters);
                 foreach (var item in Inventory.Equip)
                     if (item is EquipItem equip)
@@ -223,7 +217,7 @@ namespace AAEmu.Game.Models.Game.Char
             get
             {
                 var formula = FormulaManager.Instance.GetUnitFormula(FormulaOwnerType.Character, UnitFormulaKind.Int);
-                var parameters = new Dictionary<string, double> {["level"] = Level};
+                var parameters = new Dictionary<string, double> { ["level"] = Level };
                 var res = (int)formula.Evaluate(parameters);
                 foreach (var item in Inventory.Equip)
                     if (item is EquipItem equip)
@@ -245,7 +239,7 @@ namespace AAEmu.Game.Models.Game.Char
             get
             {
                 var formula = FormulaManager.Instance.GetUnitFormula(FormulaOwnerType.Character, UnitFormulaKind.Spi);
-                var parameters = new Dictionary<string, double> {["level"] = Level};
+                var parameters = new Dictionary<string, double> { ["level"] = Level };
                 var res = (int)formula.Evaluate(parameters);
                 foreach (var item in Inventory.Equip)
                     if (item is EquipItem equip)
@@ -267,7 +261,7 @@ namespace AAEmu.Game.Models.Game.Char
             get
             {
                 var formula = FormulaManager.Instance.GetUnitFormula(FormulaOwnerType.Character, UnitFormulaKind.Fai);
-                var parameters = new Dictionary<string, double> {["level"] = Level};
+                var parameters = new Dictionary<string, double> { ["level"] = Level };
                 var res = (int)formula.Evaluate(parameters);
                 foreach (var bonus in GetBonuses(UnitAttribute.Fai))
                 {
@@ -860,6 +854,11 @@ namespace AAEmu.Game.Models.Game.Char
             SendPacket(new SCChatMessagePacket(type, string.Format(message, parameters)));
         }
 
+        public void SendErrorMessage(ErrorMessageType type)
+        {
+            SendPacket(new SCErrorMsgPacket(type, 0, true));
+        }
+
         public void SendPacket(GamePacket packet)
         {
             Connection?.SendPacket(packet);
@@ -1309,7 +1308,7 @@ namespace AAEmu.Game.Models.Game.Char
                 character.SendPacket(new SCTargetChangedPacket(character.ObjId, 0));
             }
 
-            character.SendPacket(new SCUnitsRemovedPacket(new[] {ObjId}));
+            character.SendPacket(new SCUnitsRemovedPacket(new[] { ObjId }));
         }
 
         public PacketStream Write(PacketStream stream)

@@ -12,27 +12,26 @@ namespace AAEmu.Game.Models.Game.Units
         float distance = 1.5f;
         public override void Execute(Npc npc)
         {
+            if (npc == null) return;
+
+            //if (trg == null) return;
+            
             // If we are killed, the NPC goes to the place of spawn
             var trg = (Unit)npc.CurrentTarget;
             if (trg?.Hp <= 0)
             {
                 npc.BroadcastPacket(new SCCombatClearedPacket(npc.CurrentTarget.ObjId), true);
                 npc.BroadcastPacket(new SCCombatClearedPacket(npc.ObjId), true);
+                npc.BroadcastPacket(new SCTargetChangedPacket(npc.ObjId, 0), true);
                 npc.CurrentTarget = null;
                 npc.StartRegen();
-                npc.BroadcastPacket(new SCTargetChangedPacket(npc.ObjId, 0), true);
 
                 // Abandon tracking to stop moving beyond specified length
                 Stop(npc);
 
                 // Create Linear Cruise Return to Last Cruise Stop Point
                 // Uninterruptible, unaffected by external forces and attacks, similar to being out of combat
-                var line = new Line
-                {
-                    Interrupt = false,
-                    Loop = false,
-                    Abandon = false
-                };
+                var line = new Line { Interrupt = false, Loop = false, Abandon = false };
                 line.Pause(npc);
                 LastPatrol = line;
             }
@@ -69,7 +68,10 @@ namespace AAEmu.Game.Models.Game.Units
                     var flag = 0;
                     var flagType = flag & 15;
                     var skillObject = SkillObject.GetByType((SkillObjectType)flagType);
-                    if (flagType > 0) skillObject.Flag = SkillObjectType.None;
+                    if (flagType > 0)
+                    {
+                        skillObject.Flag = SkillObjectType.None;
+                    }
                     var skill = new Skill(SkillManager.Instance.GetSkillTemplate(skillId)); // TODO переделать...
                     skill.Use(npc, skillCaster, skillCastTarget, skillObject);
                     LoopAuto(npc);

@@ -80,7 +80,8 @@ namespace AAEmu.Game
             HousingManager.Instance.SpawnAll();
 
             AccessLevelManager.Instance.Load();
-            
+            DuelManager.Instance.Load();
+
             ScriptCompiler.Compile();
 
             TimeManager.Instance.Start();
@@ -90,8 +91,6 @@ namespace AAEmu.Game
             LoginNetwork.Instance.Start();
 
             CashShopManager.Instance.Load();
-
-            //DuelManager.Instance.Initialize();
 
             stopWatch.Stop();
             _log.Info("Server started! Took {0}", stopWatch.Elapsed);

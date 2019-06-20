@@ -1,11 +1,15 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using AAEmu.Commons.Utils;
+using AAEmu.Game.Core.Managers.UnitManagers;
 using AAEmu.Game.Core.Managers.World;
 using AAEmu.Game.Core.Network.Connections;
 using AAEmu.Game.Core.Packets.G2C;
 using AAEmu.Game.Models.Game.Char;
+using AAEmu.Game.Models.Game.Chat;
 using AAEmu.Game.Models.Game.DoodadObj;
 using AAEmu.Game.Models.Game.Duels;
+using AAEmu.Game.Models.Game.World;
 using AAEmu.Game.Models.Tasks.Doodads;
 using AAEmu.Game.Models.Tasks.Duels;
 using AAEmu.Game.Utils;
@@ -17,127 +21,278 @@ namespace AAEmu.Game.Core.Managers
     {
         protected static readonly Logger _log = LogManager.GetCurrentClassLogger();
 
-        private uint _challengerId;
-        private uint _challengedId;
-        private uint _challengerObjId;
-        private uint _challengedObjId;
-        private Character _challenger;
         private DoodadSpawner _combatFlag;
         private const double _delay = 1000; // 1 sec
-        private uint _funcGroupId;
-        private byte _det = 0;
-        private const float DistanceForSurrender = 75;         // square 75 meters
-        private const double DuelDurationTime = 5 * 60 *1000; // 5 min
+        private DuelDetType _det = DuelDetType.Lose;
+        private const float DistanceForSurrender = 75; // square 75 meters
+        private const double DuelDurationTime = 5;    // 5 min
 
-        public bool Initialise()
+        // одновременно может быть несколько дуэлей
+        private ConcurrentDictionary<uint, Duel> _duels;
+
+        protected DuelManager()
         {
-            _log.Info("DuelManager successfully initialized");
-
-            return true;
         }
 
-        public DuelManager()
+        public void Load()
         {
-
+            _log.Info("Initialising Duel Manager...");
+            _duels = new ConcurrentDictionary<uint, Duel>();
         }
 
-        public void StartDuel(GameConnection connection, uint challengerId)
+        public void AddDuels(Duel duel)
         {
-            _challengerId = challengerId;
-            _challengedObjId = connection.ActiveChar.ObjId;
-            _challengedId = connection.ActiveChar.Id;
-            _challenger = WorldManager.Instance.GetCharacterById(_challengerId);
-            _challengerObjId = _challenger.ObjId;
-
-            connection.ActiveChar.BroadcastPacket(new SCDuelStartedPacket(_challengerObjId, _challengedObjId), true);
-            connection.ActiveChar.BroadcastPacket(new SCAreaChatBubblePacket(true, connection.ActiveChar.ObjId, 543), true);
-            connection.ActiveChar.BroadcastPacket(new SCDuelStartCountdownPacket(), true);
-
-            _combatFlag = new DoodadSpawner();
-            _combatFlag.Id = 0;
-            _combatFlag.UnitId = 5014u; // Combat Flag;
-
-            _combatFlag.Position = connection.ActiveChar.Position.Clone();
-            _combatFlag.Position.X = connection.ActiveChar.Position.X - (connection.ActiveChar.Position.X - _challenger.Position.X) / 2;
-            _combatFlag.Position.Y = connection.ActiveChar.Position.Y - (connection.ActiveChar.Position.Y - _challenger.Position.Y) / 2;
-            _combatFlag.Position.Z = connection.ActiveChar.Position.Z - (connection.ActiveChar.Position.Z - _challenger.Position.Z) / 2;
-            _combatFlag.Spawn(0); // set CombatFlag
-
-            connection.ActiveChar.BroadcastPacket(new SCDuelStatePacket(_challengerObjId, _combatFlag.Last.ObjId), true);
-            connection.ActiveChar.BroadcastPacket(new SCDuelStatePacket(_challengedObjId, _combatFlag.Last.ObjId), true);
-
-            const uint NextPhase = 12830u;
-            const uint SkillId = 0u;
-
-            // make the flag flutter in the wind
-            _combatFlag.Last.GrowthTime = DateTime.Now.AddMilliseconds(100);
-            _combatFlag.Last.FuncTask = new DoodadFuncGrowthTask(connection.ActiveChar, _combatFlag.Last, SkillId, NextPhase);
-            TaskManager.Instance.Schedule(_combatFlag.Last.FuncTask, TimeSpan.FromMilliseconds(100));
-
-            // after 5 minutes the flag is removed
-            //_combatFlag.Last.GrowthTime = DateTime.Now.AddMilliseconds(DuelDurationTime);
-            //_combatFlag.Last.FuncTask = new DoodadFuncFinalTask(connection.ActiveChar, _combatFlag.Last, SkillId, false);
-            //TaskManager.Instance.Schedule(_combatFlag.Last.FuncTask, TimeSpan.FromMilliseconds(DuelDurationTime));
-
-            // Player can be attacked
-            connection.SendPacket(new SCCombatEngagedPacket(_challengerObjId));
-            connection.ActiveChar.BroadcastPacket(new SCCombatEngagedPacket(_challengedObjId), false);
-
-            var duel = new Duel();
-            // final operations after a duel
-            duel.FuncTask = new DuelEndTimerTask(duel, connection, _challengerId, _challengedId, _challengerObjId, _challengedObjId, _combatFlag.Last.ObjId, _det);
-            TaskManager.Instance.Schedule(duel.FuncTask, TimeSpan.FromMilliseconds(DuelDurationTime));
-
-            duel.FuncTask = new DuelDistanceСheckTask(duel, connection, _challengerId, _challengedId, _challengerObjId, _challengedObjId, _combatFlag.Last.ObjId);
-            TaskManager.Instance.Schedule(duel.FuncTask, TimeSpan.FromMilliseconds(_delay), TimeSpan.FromMilliseconds(_delay));
+            if (!_duels.ContainsKey(duel.Challenger.Id))
+                _duels.TryAdd(duel.Challenger.Id, duel);
+            if (!_duels.ContainsKey(duel.Challenged.Id))
+                _duels.TryAdd(duel.Challenged.Id, duel);
         }
 
-        public void StopDuel(GameConnection connection, uint challengerId, uint challengedId, uint challengerObjId, uint challengedObjId, uint flagObjId, byte det)
+        public void RemoveDuels(Duel duel)
         {
-            // Duel is over, det 00=lose, 01=win, 02=surrender (Fled beyond the flag action border), 03=draw
-            if (det == 3)
+            _duels.TryRemove(duel.Challenger.Id, out _);
+            _duels.TryRemove(duel.Challenged.Id, out _);
+        }
+        public void DuelRequest(Character challenger, uint challengedId)
+        {
+            var challenged = WorldManager.Instance.GetCharacterById(challengedId);
+            var duel = new Duel(challenger, challenged);
+            AddDuels(duel);
+
+            // приходит ID того кого вызываем на дуэль, мы отправляет свое ID т.е. того кого вызвали на дуэль
+            challenged.SendPacket(new SCDuelChallengedPacket(challenger.Id)); // we send only to the enemy
+        }
+
+        public void DuelAccepted(Character challenged, uint challengerId)
+        {
+            // приходит ID того кто вызывает на дуэль, мы отправляет свое ID т.е. того кого вызвали на дуэль
+
+            //var challenger = WorldManager.Instance.GetCharacterById(challengerId);
+            //var duel = new Duel(challenger, challenged);
+            //AddDuels(duel);
+
+            try
             {
-                connection.ActiveChar.BroadcastPacket(new SCDuelEndedPacket(challengedId, challengerId, challengedObjId, challengerObjId, det), false);
-                connection.SendPacket(new SCDuelEndedPacket(challengerId, challengedId, challengerObjId, challengedObjId, det));
+                var duel = _duels[challengerId];
+
+                if (duel.DuelStarted == false)
+                {
+                    duel.DuelStarted = true;
+                    // spawn flag
+                    _combatFlag = new DoodadSpawner
+                    {
+                        Id = 0,
+                        UnitId = 5014, // Combat Flag;
+                        Position = duel.Challenger.Position.Clone()
+                    };
+                    _combatFlag.Position.X = duel.Challenger.Position.X - (duel.Challenger.Position.X - duel.Challenged.Position.X) / 2;
+                    _combatFlag.Position.Y = duel.Challenger.Position.Y - (duel.Challenger.Position.Y - duel.Challenged.Position.Y) / 2;
+                    _combatFlag.Position.Z = WorldManager.Instance.GetHeight(_combatFlag.Position.ZoneId, _combatFlag.Position.X, _combatFlag.Position.Y);
+                    _combatFlag.Spawn(0); // set CombatFlag
+                    duel.DuelFlag = _combatFlag.Last;
+
+                    // make the flag flutter in the wind
+                    const uint NextPhase = 12830u;
+                    const uint SkillId = 0u;
+                    duel.DuelFlag.GrowthTime = DateTime.Now.AddMilliseconds(100);
+                    duel.DuelFlag.FuncTask = new DoodadFuncGrowthTask(duel.Challenger, duel.DuelFlag, SkillId, NextPhase);
+                    TaskManager.Instance.Schedule(duel.DuelFlag.FuncTask, TimeSpan.FromMilliseconds(100));
+
+                    //Schedule duel start task.
+                    duel.DuelStartTask = new DuelStartTask(duel.Challenger.Id);
+                    TaskManager.Instance.Schedule(duel.DuelStartTask, TimeSpan.FromSeconds(3));
+                }
+                else
+                {
+                    _log.Warn("DuelAccepted: Duel with challengerId = {0} is already started", challengerId);
+                }
             }
-            else
+            catch (Exception e)
             {
-                connection.ActiveChar.BroadcastPacket(new SCDuelEndedPacket(challengerId, challengedId, challengerObjId, challengedObjId, det), true);
+                //id отсутствует в базе
+                _log.Warn("DuelAccepted: Id = {0} not found in duels[], error code: {1}", challengerId, e);
             }
-
-            // Duel Status - Duel ended
-            connection.ActiveChar.BroadcastPacket(new SCDuelStatePacket(challengerObjId, 0), true);
-            connection.ActiveChar.BroadcastPacket(new SCDuelStatePacket(challengedObjId, 0), true);
-
-            //Remove Flag
-            connection.ActiveChar.BroadcastPacket(new SCDoodadRemovedPacket(flagObjId, 0), true);
-
-            // Player cannot be attacked
-            connection.SendPacket(new SCCombatClearedPacket(_challengerObjId));
-            connection.ActiveChar.BroadcastPacket(new SCCombatClearedPacket(_challengedObjId), false);
         }
 
-        public bool DistanceСheckChallenged(GameConnection connection)
+        public void DuelStart(uint id)
         {
-            // проверяем, убежали от флага или нет
-            var currentDistance = MathUtil.CalculateDistance(_combatFlag.Position, connection.ActiveChar.Position, true);
-            if(currentDistance >= DistanceForSurrender)
+            try
             {
-                return true; // сдаемся, т.е. убежали от флага
-            }
+                var duel = _duels[id];
 
-            return false;  // мы рядом с флагом
+                duel.SendPacketsBoth(new SCDuelStartedPacket(duel.Challenger.ObjId, duel.Challenged.ObjId));
+
+                duel.SendPacketChallenged(new SCAreaChatBubblePacket(true, duel.Challenger.ObjId, 543));
+                duel.SendPacketChallenger(new SCAreaChatBubblePacket(true, duel.Challenged.ObjId, 543));
+
+                duel.SendPacketsBoth(new SCDuelStartCountdownPacket());
+
+                duel.SendPacketChallenged(new SCDuelStatePacket(duel.Challenger.ObjId, duel.DuelFlag.ObjId));
+                duel.SendPacketChallenger(new SCDuelStatePacket(duel.Challenged.ObjId, duel.DuelFlag.ObjId));
+
+                // Player can be attacked
+                duel.SendPacketsBoth(new SCCombatEngagedPacket(duel.Challenger.ObjId));
+                duel.SendPacketsBoth(new SCCombatEngagedPacket(duel.Challenged.ObjId));
+
+                // final operations after a duel
+                duel.DuelEndTimerTask = new DuelEndTimerTask(duel, duel.Challenger.Id);
+                TaskManager.Instance.Schedule(duel.DuelEndTimerTask, TimeSpan.FromMinutes(DuelDurationTime));
+
+                // запустим проверку на дистанцию
+                _ = DistanceСheck(duel.Challenger.Id);
+            }
+            catch (Exception e)
+            {
+                //id отсутствует в базе
+                _log.Warn("DuelStart: Id = {0} not found in duels[], error code: {1}", id, e);
+            }
         }
-        public bool DistanceСheckChallenger(GameConnection connection)
-        {
-            // проверяем, убежали от флага или нет
-            var currentDistance = MathUtil.CalculateDistance(_combatFlag.Position, _challenger.Position, true);
-            if(currentDistance >= DistanceForSurrender)
-            {
-                return true; // сдаемся, т.е. убежали от флага
-            }
 
-            return false;  // мы рядом с флагом
+        public void DuelCancel(uint challengerId, ErrorMessageType errorMessage)
+        {
+            try
+            {
+                var duel = _duels[challengerId];
+
+                duel.DuelAllowed = false;
+
+                if (errorMessage != 0)
+                {
+                    duel.Challenger.SendErrorMessage((ErrorMessageType)errorMessage);
+                }
+
+                _log.Warn("DuelCancel: Duel with challengerId = {0} canceled, error code: {1}", challengerId, errorMessage);
+
+                CleanUpDuel(challengerId);
+            }
+            catch (Exception e)
+            {
+                //id отсутствует в базе
+                _log.Warn("DuelCancel: Id = {0} not found in duels[], error code: {1}", challengerId, e);
+            }
+        }
+
+        public void CleanUpDuel(uint id)
+        {
+            try
+            {
+                var duel = _duels[id];
+
+                if (duel.DuelStartTask != null)
+                {
+                    _ = duel.DuelStartTask.Cancel();
+                    duel.DuelStartTask = null;
+                }
+
+                if (duel.DuelEndTimerTask != null)
+                {
+                    _ = duel.DuelEndTimerTask.Cancel();
+                    duel.DuelEndTimerTask = null;
+                }
+
+                RemoveDuels(duel);
+            }
+            catch (Exception e)
+            {
+                //id отсутствует в базе
+                _log.Warn("CleanUpDuel: Id = {0} not found in duels[], error code: {1}", id, e);
+            }
+        }
+
+        public void DuelStop(uint id, DuelDetType det, uint loseId = 0)
+        {
+            try
+            {
+                var duel = _duels[id];
+
+                duel.DuelAllowed = false;
+
+                // Duel is over, det 00=lose, 01=win, 02=surrender (Fled beyond the flag action border), 03=draw
+                if (det == DuelDetType.Draw)
+                {
+                    duel.SendPacketChallenged(new SCDuelEndedPacket(duel.Challenger.Id, duel.Challenged.Id, duel.Challenger.ObjId, duel.Challenged.ObjId, det));
+                    duel.SendPacketChallenger(new SCDuelEndedPacket(duel.Challenged.Id, duel.Challenger.Id, duel.Challenged.ObjId, duel.Challenger.ObjId, det));
+                }
+                else if (loseId != 0)
+                {
+                    if (loseId == duel.Challenger.Id)
+                    {
+                        duel.SendPacketsBoth(new SCDuelEndedPacket(duel.Challenged.Id, duel.Challenger.Id, duel.Challenged.ObjId, duel.Challenger.ObjId, det));
+
+
+                    }
+                    else if (loseId == duel.Challenged.Id)
+                    {
+                        duel.SendPacketsBoth(new SCDuelEndedPacket(duel.Challenger.Id, duel.Challenged.Id, duel.Challenger.ObjId, duel.Challenged.ObjId, det));
+                    }
+                }
+
+                // Duel Status - Duel ended
+                duel.SendPacketsBoth(new SCDuelStatePacket(duel.Challenged.ObjId, 0));
+                duel.SendPacketsBoth(new SCDuelStatePacket(duel.Challenger.ObjId, 0));
+
+                if (duel.DuelFlag != null)
+                {
+                    duel.DuelFlag.Delete(); //Remove Flag
+                }
+                //Remove Flag
+                duel.SendPacketsBoth(new SCDoodadRemovedPacket(duel.DuelFlag.ObjId, 0));
+
+
+                // Player cannot be attacked
+                duel.SendPacketsBoth(new SCCombatClearedPacket(duel.Challenger.ObjId));
+                duel.SendPacketsBoth(new SCCombatClearedPacket(duel.Challenged.ObjId));
+
+                CleanUpDuel(id);
+                _log.Warn("DuelStop: Duel ended");
+            }
+            catch (Exception e)
+            {
+                //id отсутствует в базе
+                _log.Warn("DuelStop: Id = {0} not found in duels[], error code: {1}", id, e);
+            }
+        }
+
+        public DuelDistance DistanceСheck(uint id)
+        {
+            try
+            {
+                var duel = _duels[id];
+                // проверяем, убежали от флага или нет
+                var currentDistance = MathUtil.CalculateDistance(duel.DuelFlag.Position, duel.Challenger.Position, true);
+                if (currentDistance >= DistanceForSurrender)
+                {
+                    // выключаем таймер
+                    if (duel.DuelDistanceСheckTask != null)
+                    {
+                        _ = duel.DuelDistanceСheckTask.Cancel();
+                        duel.DuelDistanceСheckTask = null;
+                    }
+                    return DuelDistance.ChallengerFar; // сдается тот кто вызывал на дуэль, т.е. убежал от флага
+                }
+                // проверяем, убежали от флага или нет
+                currentDistance = MathUtil.CalculateDistance(duel.DuelFlag.Position, duel.Challenged.Position, true);
+                if (currentDistance >= DistanceForSurrender)
+                {
+                    // выключаем таймер
+                    if (duel.DuelDistanceСheckTask != null)
+                    {
+                        _ = duel.DuelDistanceСheckTask.Cancel();
+                        duel.DuelDistanceСheckTask = null;
+                    }
+                    return DuelDistance.ChallengedFar; // сдается тот кого вызвали на дуэль, т.е. убежал от флага
+                }
+                //изменил проверку дистанции с цикла, на вызов по таймеру
+                duel.DuelDistanceСheckTask = new DuelDistanceСheckTask(duel);
+                TaskManager.Instance.Schedule(duel.DuelDistanceСheckTask, TimeSpan.FromMilliseconds(_delay));
+            }
+            catch (Exception e)
+            {
+                //id отсутствует в базе
+                _log.Warn("DistanceСheck: Id = {0} not found in duels[], error code: {1}", id, e);
+                return DuelDistance.Error;  // рядом с флагом
+            }
+            return DuelDistance.Near;  // рядом с флагом
         }
     }
 }

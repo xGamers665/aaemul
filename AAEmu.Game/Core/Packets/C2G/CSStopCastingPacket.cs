@@ -15,8 +15,7 @@ namespace AAEmu.Game.Core.Packets.C2G
             stream.ReadUInt16(); // tl; pid
             var objId = stream.ReadBc();
 
-            if (Connection.ActiveChar.ObjId != objId || Connection.ActiveChar.SkillTask == null ||
-                Connection.ActiveChar.SkillTask.Skill.TlId != tl)
+            if (Connection.ActiveChar.ObjId != objId || Connection.ActiveChar.SkillTask == null || Connection.ActiveChar.SkillTask.Skill.TlId != tl)
             {
                 return;
             }

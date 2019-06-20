@@ -1,7 +1,10 @@
 ﻿using System;
+using AAEmu.Game.Core.Managers;
 using AAEmu.Game.Core.Managers.UnitManagers;
 using AAEmu.Game.Core.Packets.G2C;
+using AAEmu.Game.Models.Game.Char;
 using AAEmu.Game.Models.Game.Units;
+using AAEmu.Game.Utils;
 
 namespace AAEmu.Game.Models.Game.DoodadObj
 {
@@ -24,6 +27,14 @@ namespace AAEmu.Game.Models.Game.DoodadObj
                 return;
             }
             template.Use(caster, owner, skillId);
+
+            //if (caster is Character chr)
+            //{
+            //    chr.Item = ItemManager.Instance.Create(owner.TemplateId, 1, (byte)1);
+            //    if (chr.Item != null)
+            //        InventoryHelper.AddItemAndUpdateClient(chr, chr.Item);
+            //}
+
             if (NextPhase > 0)
             {
                 if (owner.FuncTask != null)
