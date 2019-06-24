@@ -35,14 +35,13 @@ namespace AAEmu.Game.Models.Game.Skills.Effects
             if (caster is Character character)
             {
                 character.Quests.OnInteraction(WorldInteraction);
+
                 //InventoryHelper.RemoveItemAndUpdateClient(Connection.ActiveChar, item, 1);
-
-                character.Item = new Item();
-
-                if (character.Item != null)
-                {
-                    InventoryHelper.AddItemAndUpdateClient(character, character.Item); // пробуем добавить Item при использовании
-                }
+                //character.Item = new Item();
+                //if (character.Item != null)
+                //{
+                //    InventoryHelper.AddItemAndUpdateClient(character, character.Item); // пробуем добавить Item при использовании
+                //}
             }
         }
     }
