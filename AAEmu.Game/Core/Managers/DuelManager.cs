@@ -19,7 +19,7 @@ namespace AAEmu.Game.Core.Managers
 {
     public class DuelManager : Singleton<DuelManager>
     {
-        protected static readonly Logger _log = LogManager.GetCurrentClassLogger();
+        protected static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
         private DoodadSpawner _combatFlag;
         private const double Delay = 1000; // 1 sec
@@ -35,11 +35,11 @@ namespace AAEmu.Game.Core.Managers
 
         public void Load()
         {
-            _log.Info("Initialising Duel Manager...");
+            Log.Info("Initialising Duel Manager...");
             _duels = new ConcurrentDictionary<uint, Duel>();
         }
 
-        public void AddDuels(Duel duel)
+        public void DuelAdd(Duel duel)
         {
             if (!_duels.ContainsKey(duel.Challenger.Id))
                 _duels.TryAdd(duel.Challenger.Id, duel);
@@ -48,7 +48,7 @@ namespace AAEmu.Game.Core.Managers
                 _duels.TryAdd(duel.Challenged.Id, duel);
         }
 
-        public void RemoveDuels(Duel duel)
+        public void DuelRemove(Duel duel)
         {
             _duels.TryRemove(duel.Challenger.Id, out _);
             _duels.TryRemove(duel.Challenged.Id, out _);
@@ -57,7 +57,7 @@ namespace AAEmu.Game.Core.Managers
         {
             var challenged = WorldManager.Instance.GetCharacterById(challengedId);
             var duel = new Duel(challenger, challenged);
-            AddDuels(duel);
+            DuelAdd(duel);
 
             // приходит ID того кого вызываем на дуэль, мы отправляет свое ID т.е. того кого вызвали на дуэль
             challenged.SendPacket(new SCDuelChallengedPacket(challenger.Id)); // we send only to the enemy
@@ -101,12 +101,12 @@ namespace AAEmu.Game.Core.Managers
                     TaskManager.Instance.Schedule(duel.DuelStartTask, TimeSpan.FromSeconds(3));
                 }
                 else
-                    _log.Warn("DuelAccepted: Duel with challengerId = {0} is already started", challengerId);
+                    Log.Warn("DuelAccepted: Duel with challengerId = {0} is already started", challengerId);
             }
             catch (Exception e)
             {
                 //id отсутствует в базе
-                _log.Warn("DuelAccepted: Id = {0} not found in duels[], error code: {1}", challengerId, e);
+                Log.Warn("DuelAccepted: Id = {0} not found in duels[], error code: {1}", challengerId, e);
             }
         }
 
@@ -128,12 +128,12 @@ namespace AAEmu.Game.Core.Managers
                 duel.DuelEndTimerTask = new DuelEndTimerTask(duel, duel.Challenger.Id);
                 TaskManager.Instance.Schedule(duel.DuelEndTimerTask, TimeSpan.FromMinutes(DuelDurationTime));
                 // запустим проверку на дистанцию
-                _ = DistanceСheck(duel.Challenger.Id);
+                _ = DuelDistanceСheck(duel.Challenger.Id);
             }
             catch (Exception e)
             {
                 //id отсутствует в базе
-                _log.Warn("DuelStart: Id = {0} not found in duels[], error code: {1}", id, e);
+                Log.Warn("DuelStart: Id = {0} not found in duels[], error code: {1}", id, e);
             }
         }
 
@@ -146,17 +146,17 @@ namespace AAEmu.Game.Core.Managers
                 if (errorMessage != 0)
                     duel.Challenger.SendErrorMessage((ErrorMessageType)errorMessage);
 
-                _log.Warn("DuelCancel: Duel with challengerId = {0} canceled, error code: {1}", challengerId, errorMessage);
-                CleanUpDuel(challengerId);
+                Log.Warn("DuelCancel: Duel with challengerId = {0} canceled, error code: {1}", challengerId, errorMessage);
+                DuelCleanUp(challengerId);
             }
             catch (Exception e)
             {
                 //id отсутствует в базе
-                _log.Warn("DuelCancel: Id = {0} not found in duels[], error code: {1}", challengerId, e);
+                Log.Warn("DuelCancel: Id = {0} not found in duels[], error code: {1}", challengerId, e);
             }
         }
 
-        public void CleanUpDuel(uint id)
+        public void DuelCleanUp(uint id)
         {
             try
             {
@@ -174,12 +174,12 @@ namespace AAEmu.Game.Core.Managers
                     duel.DuelEndTimerTask = null;
                 }
 
-                RemoveDuels(duel);
+                DuelRemove(duel);
             }
             catch (Exception e)
             {
                 //id отсутствует в базе
-                _log.Warn("CleanUpDuel: Id = {0} not found in duels[], error code: {1}", id, e);
+                Log.Warn("CleanUpDuel: Id = {0} not found in duels[], error code: {1}", id, e);
             }
         }
 
@@ -221,17 +221,17 @@ namespace AAEmu.Game.Core.Managers
                 duel.SendPacketsBoth(new SCCombatClearedPacket(duel.Challenger.ObjId));
                 duel.SendPacketsBoth(new SCCombatClearedPacket(duel.Challenged.ObjId));
 
-                CleanUpDuel(id);
-                _log.Warn("DuelStop: Duel ended");
+                DuelCleanUp(id);
+                Log.Warn("DuelStop: Duel ended");
             }
             catch (Exception e)
             {
                 //id отсутствует в базе
-                _log.Warn("DuelStop: Id = {0} not found in duels[], error code: {1}", id, e);
+                Log.Warn("DuelStop: Id = {0} not found in duels[], error code: {1}", id, e);
             }
         }
 
-        public DuelDistance DistanceСheck(uint id)
+        public DuelDistance DuelDistanceСheck(uint id)
         {
             try
             {
@@ -267,7 +267,7 @@ namespace AAEmu.Game.Core.Managers
             catch (Exception e)
             {
                 //id отсутствует в базе
-                _log.Warn("DistanceСheck: Id = {0} not found in duels[], error code: {1}", id, e);
+                Log.Warn("DistanceСheck: Id = {0} not found in duels[], error code: {1}", id, e);
                 return DuelDistance.Error;  // рядом с флагом
             }
             return DuelDistance.Near;  // рядом с флагом

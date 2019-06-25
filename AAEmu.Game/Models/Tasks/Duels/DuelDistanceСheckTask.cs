@@ -19,16 +19,18 @@ namespace AAEmu.Game.Models.Tasks.Duels
 
         public override void Execute()
         {
-            // если выключен, то сразу на выход
-            if (_duel.DuelDistanceСheckTask == null)
+            if(_duel.DuelDistanceСheckTask == null)
                 return;
 
-            var res = DuelManager.Instance.DistanceСheck(_challengerId);
+            var res = DuelManager.Instance.DuelDistanceСheck(_challengerId);
             if (res == DuelDistance.ChallengerFar)
+            {
                 DuelManager.Instance.DuelStop(_challengedId, DuelDetType.Surrender, _challengerId);
-
+            }
             else if (res == DuelDistance.ChallengedFar)
+            {
                 DuelManager.Instance.DuelStop(_challengerId, DuelDetType.Surrender, _challengedId);
+            }
         }
     }
 }
