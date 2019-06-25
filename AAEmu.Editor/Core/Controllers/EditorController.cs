@@ -2,18 +2,18 @@
 using System.Collections.Generic;
 using System.Linq;
 using AAEmu.Commons.Utils;
-using AAEmu.Login.Core.Network.Connections;
-using AAEmu.Login.Core.Packets.L2C;
-using AAEmu.Login.Core.Packets.L2G;
-using AAEmu.Login.Utils;
+using AAEmu.Editor.Core.Network.Connections;
+using AAEmu.Editor.Core.Packets.L2C;
+using AAEmu.Editor.Core.Packets.L2G;
+using AAEmu.Editor.Utils;
 
-namespace AAEmu.Login.Core.Controllers
+namespace AAEmu.Editor.Core.Controllers
 {
-    public class LoginController : Singleton<LoginController>
+    public class EditorController : Singleton<EditorController>
     {
         private Dictionary<byte, Dictionary<uint, uint>> _tokens; // gsId, [token, accountId]
 
-        protected LoginController()
+        protected EditorController()
         {
             _tokens = new Dictionary<byte, Dictionary<uint, uint>>();
         }
@@ -23,7 +23,7 @@ namespace AAEmu.Login.Core.Controllers
         /// </summary>
         /// <param name="connection"></param>
         /// <param name="username"></param>
-        public static void Login(LoginConnection connection, string username)
+        public static void Editor(EditorConnection connection, string username)
         {
             using (var connect = MySQL.Create())
             {
@@ -36,7 +36,7 @@ namespace AAEmu.Login.Core.Controllers
                     {
                         if (!reader.Read())
                         {
-                            connection.SendPacket(new ACLoginDeniedPacket(2));
+                            connection.SendPacket(new ACEditorDeniedPacket(2));
                             return;
                         }
 
@@ -44,11 +44,12 @@ namespace AAEmu.Login.Core.Controllers
 
                         connection.AccountId = reader.GetUInt32("id");
                         connection.AccountName = username;
-                        connection.LastLogin = DateTime.Now;
+                        connection.LastEditor = DateTime.Now;
                         connection.LastIp = connection.Ip;
 
-                        connection.SendPacket(new ACJoinResponsePacket(0, 6));
-                        connection.SendPacket(new ACAuthResponsePacket(connection.AccountId, 6));
+                        //connection.SendPacket(new ACJoinResponsePacket(0, 6));
+                        //connection.SendPacket(new ACAuthResponsePacket(connection.AccountId, 6));
+                        connection.SendPacket(new ECEditorResponsePacket(connection.AccountId, 6));
                     }
                 }
             }
@@ -60,7 +61,7 @@ namespace AAEmu.Login.Core.Controllers
         /// <param name="connection"></param>
         /// <param name="username"></param>
         /// <param name="password"></param>
-        public static void Login(LoginConnection connection, string username, IEnumerable<byte> password)
+        public static void Editor(EditorConnection connection, string username, IEnumerable<byte> password)
         {
             using (var connect = MySQL.Create())
             {
@@ -73,20 +74,20 @@ namespace AAEmu.Login.Core.Controllers
                     {
                         if (!reader.Read())
                         {
-                            connection.SendPacket(new ACLoginDeniedPacket(2));
+                            connection.SendPacket(new ACEditorDeniedPacket(2));
                             return;
                         }
 
                         var pass = Convert.FromBase64String(reader.GetString("password"));
                         if (!pass.SequenceEqual(password))
                         {
-                            connection.SendPacket(new ACLoginDeniedPacket(2));
+                            connection.SendPacket(new ACEditorDeniedPacket(2));
                             return;
                         }
 
                         connection.AccountId = reader.GetUInt32("id");
                         connection.AccountName = username;
-                        connection.LastLogin = DateTime.Now;
+                        connection.LastEditor = DateTime.Now;
                         connection.LastIp = connection.Ip;
 
                         connection.SendPacket(new ACJoinResponsePacket(0, 6));
@@ -105,7 +106,7 @@ namespace AAEmu.Login.Core.Controllers
             connection.SendPacket(new LGPlayerReconnectPacket(token));
         }
 
-        public void Reconnect(LoginConnection connection, byte gsId, uint accountId, uint token)
+        public void Reconnect(EditorConnection connection, byte gsId, uint accountId, uint token)
         {
             if (!_tokens.ContainsKey(gsId))
             {

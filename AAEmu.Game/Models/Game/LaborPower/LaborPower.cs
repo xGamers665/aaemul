@@ -32,17 +32,17 @@ namespace AAEmu.Game.Models.Game.LaborPower
 
         public void ChangeLabor(short change, int actabilityId)
         {
-            var actabilityChange = 0;
-            byte actabilityStep = 0;
-            if (actabilityId > 0)
-            {
-                actabilityChange = Math.Abs(change);
-                actabilityStep = Actability.Actabilities[(uint)actabilityId].Step;
-                Actability.AddPoint((uint)actabilityId, actabilityChange);
-            }
+            //var actabilityChange = 0;
+            //byte actabilityStep = 0;
+            //if (actabilityId > 0)
+            //{
+            //    actabilityChange = Math.Abs(change);
+            //    actabilityStep = Actability.Actabilities[(uint)actabilityId].Step;
+            //    Actability.AddPoint((uint)actabilityId, actabilityChange);
+            //}
 
-            Lp += change;
-            SendPacket(new SCCharacterLaborPowerChangedPacket(change, actabilityId, actabilityChange, actabilityStep));
+            //Lp += change;
+            //SendPacket(new SCCharacterLaborPowerChangedPacket(change, actabilityId, actabilityChange, actabilityStep));
         }
 
         #region Database
@@ -138,15 +138,15 @@ namespace AAEmu.Game.Models.Game.LaborPower
 
         public void SendPacket(GamePacket packet)
         {
-            Connection?.SendPacket(packet);
+            //Connection?.SendPacket(packet);
         }
 
         public void BroadcastPacket(GamePacket packet, bool self)
         {
-            foreach (var character in WorldManager.Instance.GetAround<Character>(this))
-                character.SendPacket(packet);
-            if (self)
-                SendPacket(packet);
+            //foreach (var character in WorldManager.Instance.GetAround<Character>(this))
+            //    character.SendPacket(packet);
+            //if (self)
+            //    SendPacket(packet);
         }
     }
 }

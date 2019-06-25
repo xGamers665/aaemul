@@ -2,22 +2,22 @@
 using System.Net;
 using AAEmu.Commons.Network.Type;
 using AAEmu.Commons.Utils;
-using AAEmu.Login.Core.Packets.C2L;
-using AAEmu.Login.Models;
+using AAEmu.Editor.Core.Packets.C2L;
+using AAEmu.Editor.Models;
 using NLog;
 
-namespace AAEmu.Login.Core.Network.Login
+namespace AAEmu.Editor.Core.Network.Editor
 {
-    public class LoginNetwork : Singleton<LoginNetwork>
+    public class EditorNetwork : Singleton<EditorNetwork>
     {
         private static Logger _log = LogManager.GetCurrentClassLogger();
 
         private Server _server;
-        private LoginProtocolHandler _handler;
+        private EditorProtocolHandler _handler;
 
-        private LoginNetwork()
+        private EditorNetwork()
         {
-            _handler = new LoginProtocolHandler();
+            _handler = new EditorProtocolHandler();
 
             RegisterPacket(0x01, typeof(CARequestAuthPacket)); // шлет Editor
             RegisterPacket(0x02, typeof(CARequestAuthTencentPacket));

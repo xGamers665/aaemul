@@ -22,7 +22,7 @@ namespace AAEmu.Game.Models.Game.DoodadObj.Funcs
                 owner.BroadcastPacket(new SCDoodadSoundPacket(owner, func.SoundId), true); // добавил? так как у некоторых Doodad есть звук
             }
             // выполняем действие
-            //owner.BroadcastPacket(new SCDoodadPhaseChangedPacket(owner), false);
+            owner.BroadcastPacket(new SCDoodadPhaseChangedPacket(owner), true);
         }
     }
 }
