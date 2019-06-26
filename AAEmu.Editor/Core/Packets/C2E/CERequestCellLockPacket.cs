@@ -4,17 +4,18 @@ using AAEmu.Editor.Core.Network.Editor;
 
 namespace AAEmu.Editor.Core.Packets.C2E
 {
-    public class CECommandPacket : EditorPacket
+    public class CERequestCellLockPacket : EditorPacket
     {
-        public CECommandPacket() : base(0x0E)
+        public CERequestCellLockPacket() : base(0x06)
         {
         }
 
         public override void Read(PacketStream stream)
         {
-            var botAccounr = stream.ReadString();
-            var command = stream.ReadByte();
-            var jobId = stream.ReadUInt32();
+            var worldName = stream.ReadString();
+            var cell = stream.ReadUInt64(); // Times2D
+            var type = stream.ReadByte();
+            var lok = stream.ReadBoolean(); // lock
 
             //EditorController.Editor(Connection, account);
         }

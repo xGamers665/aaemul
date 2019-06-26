@@ -6,7 +6,7 @@ namespace AAEmu.Editor.Core.Packets.C2E
 {
     public class CEBatchQueryPacket : EditorPacket
     {
-        public CEBatchQueryPacket() : base(0x0E)
+        public CEBatchQueryPacket() : base(0x0C)
         {
         }
 
