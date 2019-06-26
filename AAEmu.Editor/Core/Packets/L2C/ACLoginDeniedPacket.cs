@@ -22,7 +22,7 @@ namespace AAEmu.Editor.Core.Packets.L2C
         }
 
         /*
-        0 = "Editor_unknown";
+        0 = "Login_unknown";
         1 = "bad_account";
         2 = "bad_response";
         3 = "duplicate_Editor";

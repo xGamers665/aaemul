@@ -2,7 +2,7 @@
 using System.Net;
 using AAEmu.Commons.Network.Type;
 using AAEmu.Commons.Utils;
-using AAEmu.Editor.Core.Packets.C2L;
+using AAEmu.Editor.Core.Packets.C2E;
 using AAEmu.Editor.Models;
 using NLog;
 
@@ -19,19 +19,19 @@ namespace AAEmu.Editor.Core.Network.Editor
         {
             _handler = new EditorProtocolHandler();
 
-            RegisterPacket(0x01, typeof(CARequestAuthPacket)); // шлет Editor
-            RegisterPacket(0x02, typeof(CARequestAuthTencentPacket));
-            RegisterPacket(0x03, typeof(CARequestAuthGameOnPacket));
-            RegisterPacket(0x04, typeof(CARequestAuthTrionPacket));
-            RegisterPacket(0x05, typeof(CARequestAuthMailRuPacket)); // TODO +
-            RegisterPacket(0x06, typeof(CAChallengeResponsePacket));
-            RegisterPacket(0x07, typeof(CAChallengeResponse2Packet));
-            RegisterPacket(0x08, typeof(CAOtpNumberPacket));
-            RegisterPacket(0x0a, typeof(CAPcCertNumberPacket));
-            RegisterPacket(0x0b, typeof(CAListWorldPacket)); // TODO +
-            RegisterPacket(0x0c, typeof(CAEnterWorldPacket)); // TODO +
-            RegisterPacket(0x0d, typeof(CACancelEnterWorldPacket));
-            RegisterPacket(0x0e, typeof(CARequestReconnectPacket)); // TODO +
+            RegisterPacket(0x01, typeof(CELoginPacket)); // шлет Editor первым пакетом
+            //RegisterPacket(0x02, typeof(CARequestAuthTencentPacket));
+            //RegisterPacket(0x03, typeof(CARequestAuthGameOnPacket));
+            //RegisterPacket(0x04, typeof(CARequestAuthTrionPacket));
+            //RegisterPacket(0x05, typeof(CARequestAuthMailRuPacket)); // TODO +
+            //RegisterPacket(0x06, typeof(CAChallengeResponsePacket));
+            //RegisterPacket(0x07, typeof(CAChallengeResponse2Packet));
+            //RegisterPacket(0x08, typeof(CAOtpNumberPacket));
+            //RegisterPacket(0x0a, typeof(CAPcCertNumberPacket));
+            //RegisterPacket(0x0b, typeof(CAListWorldPacket)); // TODO +
+            //RegisterPacket(0x0c, typeof(CAEnterWorldPacket)); // TODO +
+            //RegisterPacket(0x0d, typeof(CACancelEnterWorldPacket));
+            //RegisterPacket(0x0e, typeof(CARequestReconnectPacket)); // TODO +
         }
 
         public void Start()

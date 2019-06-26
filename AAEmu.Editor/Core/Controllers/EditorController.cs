@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using AAEmu.Commons.Utils;
 using AAEmu.Editor.Core.Network.Connections;
+using AAEmu.Editor.Core.Packets.E2C;
+using AAEmu.Editor.Core.Packets.C2E;
+using AAEmu.Editor.Utils;
 using AAEmu.Editor.Core.Packets.L2C;
 using AAEmu.Editor.Core.Packets.L2G;
-using AAEmu.Editor.Utils;
 
 namespace AAEmu.Editor.Core.Controllers
 {
@@ -47,9 +49,7 @@ namespace AAEmu.Editor.Core.Controllers
                         connection.LastEditor = DateTime.Now;
                         connection.LastIp = connection.Ip;
 
-                        //connection.SendPacket(new ACJoinResponsePacket(0, 6));
-                        //connection.SendPacket(new ACAuthResponsePacket(connection.AccountId, 6));
-                        connection.SendPacket(new ECEditorResponsePacket(connection.AccountId, 6));
+                        connection.SendPacket(new ECEditorResponsePacket(0, @"c:\aa\Archeage1.2\bin32\Editor.exe"));
                     }
                 }
             }
