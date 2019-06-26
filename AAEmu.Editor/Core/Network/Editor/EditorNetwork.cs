@@ -20,18 +20,16 @@ namespace AAEmu.Editor.Core.Network.Editor
             _handler = new EditorProtocolHandler();
 
             RegisterPacket(0x01, typeof(CELoginPacket)); // шлет Editor первым пакетом
-            //RegisterPacket(0x02, typeof(CARequestAuthTencentPacket));
-            //RegisterPacket(0x03, typeof(CARequestAuthGameOnPacket));
-            //RegisterPacket(0x04, typeof(CARequestAuthTrionPacket));
-            //RegisterPacket(0x05, typeof(CARequestAuthMailRuPacket)); // TODO +
-            //RegisterPacket(0x06, typeof(CAChallengeResponsePacket));
-            //RegisterPacket(0x07, typeof(CAChallengeResponse2Packet));
-            //RegisterPacket(0x08, typeof(CAOtpNumberPacket));
-            //RegisterPacket(0x0a, typeof(CAPcCertNumberPacket));
-            //RegisterPacket(0x0b, typeof(CAListWorldPacket)); // TODO +
-            //RegisterPacket(0x0c, typeof(CAEnterWorldPacket)); // TODO +
-            //RegisterPacket(0x0d, typeof(CACancelEnterWorldPacket));
-            //RegisterPacket(0x0e, typeof(CARequestReconnectPacket)); // TODO +
+            RegisterPacket(0x02, typeof(CERequestCellLockInfoPacket));
+            RegisterPacket(0x03, typeof(CERequestLockPacket));
+            RegisterPacket(0x04, typeof(CERequestMultipleLocksPacket));
+            RegisterPacket(0x05, typeof(CEIncreaseVersionPacket));
+            RegisterPacket(0x06, typeof(CERequestCellLockPacket));
+            RegisterPacket(0x07, typeof(CEPongPacket));
+            RegisterPacket(0x08, typeof(CEChatPacket));
+            RegisterPacket(0x0a, typeof(CEBatchRequestPacket));
+            RegisterPacket(0x0c, typeof(CEBatchQueryPacket));
+            RegisterPacket(0x0e, typeof(CECommandPacket));
         }
 
         public void Start()
