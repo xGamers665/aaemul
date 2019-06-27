@@ -9,18 +9,20 @@ namespace AAEmu.Game.Models.Game.Units
 {
     class Combat : Patrol
     {
-        float distance = 1.5f;
+        readonly float _distance = 1.5f;
         public override void Execute(Npc npc)
         {
-            if (npc == null) return;
+            if (npc == null)
+                return;
 
-            //if (trg == null) return;
-            
             // If we are killed, the NPC goes to the place of spawn
             var trg = (Unit)npc.CurrentTarget;
+            //if (trg == null)
+            //    return;
+
             if (trg?.Hp <= 0)
             {
-                npc.BroadcastPacket(new SCCombatClearedPacket(npc.CurrentTarget.ObjId), true);
+                npc.BroadcastPacket(new SCCombatClearedPacket(trg.ObjId), true);
                 npc.BroadcastPacket(new SCCombatClearedPacket(npc.ObjId), true);
                 npc.BroadcastPacket(new SCTargetChangedPacket(npc.ObjId, 0), true);
                 npc.CurrentTarget = null;
@@ -31,7 +33,12 @@ namespace AAEmu.Game.Models.Game.Units
 
                 // Create Linear Cruise Return to Last Cruise Stop Point
                 // Uninterruptible, unaffected by external forces and attacks, similar to being out of combat
-                var line = new Line { Interrupt = false, Loop = false, Abandon = false };
+                var line = new Line
+                {
+                    Interrupt = false,
+                    Loop = false,
+                    Abandon = false
+                };
                 line.Pause(npc);
                 LastPatrol = line;
             }
@@ -39,15 +46,21 @@ namespace AAEmu.Game.Models.Game.Units
             {
                 // 先判断距离
                 // First judge the distance
-                var move = false;
-                var x = npc.Position.X - npc.CurrentTarget.Position.X;
-                var y = npc.Position.Y - npc.CurrentTarget.Position.Y;
-                var z = npc.Position.Z - npc.CurrentTarget.Position.Z;
-                var MaxXYZ = Math.Max(Math.Max(Math.Abs(x), Math.Abs(y)), Math.Abs(z));
+                //var move = false;
+                float maxXYZ;
+                if (trg != null)
+                {
+                    var x = npc.Position.X - trg.Position.X;
+                    var y = npc.Position.Y - trg.Position.Y;
+                    var z = npc.Position.Z - trg.Position.Z;
+                    maxXYZ = Math.Max(Math.Max(Math.Abs(x), Math.Abs(y)), Math.Abs(z));
+                }
+                else
+                    maxXYZ = _distance + 1f;
 
                 // 如果最大值超过distance 则放弃攻击转而进行追踪
                 // If the maximum value exceeds distance, the attack is abandoned and the tracking is followed.
-                if (MaxXYZ > distance)
+                if (maxXYZ > _distance)
                 {
                     var track = new Track();
                     track.Pause(npc);
@@ -69,9 +82,8 @@ namespace AAEmu.Game.Models.Game.Units
                     var flagType = flag & 15;
                     var skillObject = SkillObject.GetByType((SkillObjectType)flagType);
                     if (flagType > 0)
-                    {
                         skillObject.Flag = SkillObjectType.None;
-                    }
+
                     var skill = new Skill(SkillManager.Instance.GetSkillTemplate(skillId)); // TODO переделать...
                     skill.Use(npc, skillCaster, skillCastTarget, skillObject);
                     LoopAuto(npc);

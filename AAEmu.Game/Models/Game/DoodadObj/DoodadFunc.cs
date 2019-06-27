@@ -31,7 +31,6 @@ namespace AAEmu.Game.Models.Game.DoodadObj
             if (template == null)
                 return;
 
-            owner.FuncGroupId = (uint)NextPhase;
             template.Use(caster, owner, skillId);
             if (NextPhase > 0)
             {
@@ -40,13 +39,11 @@ namespace AAEmu.Game.Models.Game.DoodadObj
                     await owner.FuncTask.Cancel();
                     owner.FuncTask = null;
                 }
-                //owner.FuncGroupId = (uint)NextPhase;
-                //owner.BroadcastPacket(new SCDoodadPhaseChangedPacket(owner), true); // TODO добавил для работы вкл/выкл освещения и разрушения бочек/ящиков
+                owner.FuncGroupId = (uint)NextPhase;
+                owner.BroadcastPacket(new SCDoodadPhaseChangedPacket(owner), false); // TODO добавил для работы вкл/выкл освещения и разрушения бочек/ящиков
                 var funcs = DoodadManager.Instance.GetPhaseFunc(owner.FuncGroupId);
                 foreach (var func in funcs)
-                {
                     func.Use(caster, owner, skillId);
-                }
             }
         }
     }

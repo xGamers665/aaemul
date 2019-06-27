@@ -1,6 +1,6 @@
 ﻿using AAEmu.Commons.Network;
 using AAEmu.Game.Core.Network.Game;
-using AAEmu.Game.Models.Game.Chat;
+using AAEmu.Game.Models.Game.Error;
 
 namespace AAEmu.Game.Core.Packets.G2C
 {

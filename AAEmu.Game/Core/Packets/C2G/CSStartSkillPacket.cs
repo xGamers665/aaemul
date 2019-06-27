@@ -1,6 +1,7 @@
 ﻿using AAEmu.Commons.Network;
 using AAEmu.Game.Core.Managers;
 using AAEmu.Game.Core.Network.Game;
+using AAEmu.Game.Models.Game.Error;
 using AAEmu.Game.Models.Game.Items;
 using AAEmu.Game.Models.Game.Skills;
 using AAEmu.Game.Utils;
@@ -34,12 +35,12 @@ namespace AAEmu.Game.Core.Packets.C2G
 
             _log.Debug("StartSkill: Id {0}, flag {1}", skillId, flag);
 
-
             if (skillCaster is SkillItem)
             {
                 item = Connection.ActiveChar.Inventory.GetItem(((SkillItem)skillCaster).ItemId);
                 if (item == null || skillId != item.Template.UseSkillId)
                 {
+                    Connection.ActiveChar.SendErrorMessage(ErrorMessageType.FailedToUseItem);
                     return;
                 }
                 Connection.ActiveChar.Quests.OnItemUse(item);
@@ -60,6 +61,7 @@ namespace AAEmu.Game.Core.Packets.C2G
             else
             {
                 _log.Warn("StartSkill: Id {0}, undefined use type", skillId);
+                Connection.ActiveChar.SendErrorMessage(ErrorMessageType.UnknownSkill);
                 return;
             }
 

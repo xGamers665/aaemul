@@ -20,7 +20,6 @@ namespace AAEmu.Game.Models.Game.Duels
     }
     public enum DuelDistance : sbyte
     {
-        // det 00=lose, 01=win, 02=surrender (Fled beyond the flag action border), 03=draw
         Error = -1,
         Near = 0,
         ChallengerFar = 1,

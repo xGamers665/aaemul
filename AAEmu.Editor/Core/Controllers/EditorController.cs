@@ -49,7 +49,7 @@ namespace AAEmu.Editor.Core.Controllers
                         connection.LastEditor = DateTime.Now;
                         connection.LastIp = connection.Ip;
 
-                        //connection.SendPacket(new ECEditorResponsePacket(0, "c:\\aa\\Archeage1.2\\game\\"));
+                        //connection.SendPacket(new ECEditorResponsePacket(0, "c:\\aa\\Archeage0.5\\bin32(test)\\dedicatedserver.exe"));
                     }
                 }
             }

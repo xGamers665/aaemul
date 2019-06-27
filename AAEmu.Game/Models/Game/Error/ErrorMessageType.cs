@@ -1,4 +1,4 @@
-﻿namespace AAEmu.Game.Models.Game.Chat
+﻿namespace AAEmu.Game.Models.Game.Error
 {
     public enum ErrorMessageType : short
     {   //switch 842 cases

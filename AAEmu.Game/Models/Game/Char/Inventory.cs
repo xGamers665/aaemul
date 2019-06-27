@@ -256,6 +256,7 @@ namespace AAEmu.Game.Models.Game.Char
         {
             if (item.SlotType == SlotType.Equipment)
                 Equip[item.Slot] = null;
+
             else if (item.SlotType == SlotType.Inventory)
             {
                 Items[item.Slot] = null;
@@ -271,6 +272,7 @@ namespace AAEmu.Game.Models.Game.Char
 
             if (release)
                 ItemIdManager.Instance.ReleaseId((uint)item.Id);
+            
             lock (_removedItems)
             {
                 if (!_removedItems.Contains(item.Id))

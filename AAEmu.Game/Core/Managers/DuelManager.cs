@@ -9,6 +9,7 @@ using AAEmu.Game.Models.Game.Char;
 using AAEmu.Game.Models.Game.Chat;
 using AAEmu.Game.Models.Game.DoodadObj;
 using AAEmu.Game.Models.Game.Duels;
+using AAEmu.Game.Models.Game.Error;
 using AAEmu.Game.Models.Game.World;
 using AAEmu.Game.Models.Tasks.Doodads;
 using AAEmu.Game.Models.Tasks.Duels;

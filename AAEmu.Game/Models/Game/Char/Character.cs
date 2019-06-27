@@ -5,13 +5,10 @@ using AAEmu.Commons.Utils;
 using AAEmu.Game.Core.Managers;
 using AAEmu.Game.Core.Managers.UnitManagers;
 using AAEmu.Game.Core.Managers.World;
-using AAEmu.Game.Core.Network.Connections;
 using AAEmu.Game.Core.Network.Game;
 using AAEmu.Game.Core.Packets.G2C;
 using AAEmu.Game.Models.Game.Chat;
 using AAEmu.Game.Models.Game.DoodadObj;
-using AAEmu.Game.Models.Game.Expeditions;
-using AAEmu.Game.Models.Game.Faction;
 using AAEmu.Game.Models.Game.Formulas;
 using AAEmu.Game.Models.Game.Items;
 using AAEmu.Game.Models.Game.Items.Actions;
@@ -49,7 +46,7 @@ namespace AAEmu.Game.Models.Game.Char
 
         private Dictionary<ushort, string> _options;
 
-        public GameConnection Connection { get; set; }
+        //public GameConnection Connection { get; set; }
         public List<IDisposable> Subscribers { get; set; }
 
         public uint Id { get; set; }
@@ -854,15 +851,15 @@ namespace AAEmu.Game.Models.Game.Char
             SendPacket(new SCChatMessagePacket(type, string.Format(message, parameters)));
         }
 
-        public void SendErrorMessage(ErrorMessageType type)
-        {
-            SendPacket(new SCErrorMsgPacket(type, 0, true));
-        }
+        //public void SendErrorMessage(ErrorMessageType type)
+        //{
+        //    SendPacket(new SCErrorMsgPacket(type, 0, true));
+        //}
 
-        public void SendPacket(GamePacket packet)
-        {
-            Connection?.SendPacket(packet);
-        }
+        //public void SendPacket(GamePacket packet)
+        //{
+        //    Connection?.SendPacket(packet);
+        //}
 
         public override void BroadcastPacket(GamePacket packet, bool self)
         {

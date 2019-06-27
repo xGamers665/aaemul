@@ -75,10 +75,14 @@ namespace AAEmu.Game.Core.Managers.World
                 case 1: // выход к списку персонажей
                     if (connection.State == GameState.World)
                     {
-                        connection.SendPacket(new SCPrepareLeaveWorldPacket(10000, type, false));
+                        var delay = 10;
+                        if (connection.ActiveChar.IsInBattle == true)
+                            delay = 20;
+
+                        connection.SendPacket(new SCPrepareLeaveWorldPacket(delay * 1000, type, false));
 
                         connection.LeaveTask = new LeaveWorldTask(connection, type);
-                        TaskManager.Instance.Schedule(connection.LeaveTask, TimeSpan.FromSeconds(10));
+                        TaskManager.Instance.Schedule(connection.LeaveTask, TimeSpan.FromSeconds(delay));
                     }
 
                     break;
