@@ -6,7 +6,6 @@ using AAEmu.Game.Core.Managers.Id;
 using AAEmu.Game.Core.Managers.World;
 using AAEmu.Game.Core.Packets.G2C;
 using AAEmu.Game.Models.Game.Char;
-using AAEmu.Game.Models.Game.Chat;
 using AAEmu.Game.Models.Game.Error;
 using AAEmu.Game.Models.Game.Faction;
 using AAEmu.Game.Models.Game.Items;
@@ -24,7 +23,7 @@ namespace AAEmu.Game.Models.Game.Skills
 {
     public class Skill
     {
-        private static Logger _log = LogManager.GetCurrentClassLogger();
+        protected static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
         public uint Id { get; set; }
         public SkillTemplate Template { get; set; }
@@ -50,169 +49,323 @@ namespace AAEmu.Game.Models.Game.Skills
             var effects = caster.Effects.GetEffectsByType(typeof(BuffTemplate));
             foreach (var effect in effects)
                 if (((BuffTemplate)effect.Template).RemoveOnStartSkill || ((BuffTemplate)effect.Template).RemoveOnUseSkill)
-                {
                     effect.Exit();
-                }
 
             effects = caster.Effects.GetEffectsByType(typeof(BuffEffect));
             foreach (var effect in effects)
                 if (((BuffEffect)effect.Template).Buff.RemoveOnStartSkill || ((BuffEffect)effect.Template).Buff.RemoveOnUseSkill)
-                {
                     effect.Exit();
-                }
 
             var target = (BaseUnit)caster;
 
-            if (Template.TargetType == SkillTargetType.Self)
+            switch (Template.TargetType)
             {
-                if (targetCaster.Type == SkillCastTargetType.Unit || targetCaster.Type == SkillCastTargetType.Doodad)
-                    targetCaster.ObjId = target.ObjId;
+                case SkillTargetType.Self:
+                    {
+                        if (targetCaster.Type == SkillCastTargetType.Unit || targetCaster.Type == SkillCastTargetType.Doodad)
+                            targetCaster.ObjId = target.ObjId;
+                        break;
+                    }
 
-            }
-            else if (Template.TargetType == SkillTargetType.Friendly)
-            {
-                if (targetCaster.Type == SkillCastTargetType.Unit || targetCaster.Type == SkillCastTargetType.Doodad)
+                case SkillTargetType.Friendly:
+                    {
+                        if (targetCaster.Type == SkillCastTargetType.Unit || targetCaster.Type == SkillCastTargetType.Doodad)
+                        {
+                            target = targetCaster.ObjId > 0 ? WorldManager.Instance.GetBaseUnit(targetCaster.ObjId) : caster;
+                            targetCaster.ObjId = target.ObjId;
+                        }
+                        else
+                            caster.SendErrorMessage(ErrorMessageType.InvalidTarget); // TODO ...
+
+                        if (caster.Faction.GetRelationState(target.Faction.Id) != RelationState.Friendly)
+                        {
+                            caster.SendErrorMessage(ErrorMessageType.FactionRelationAlreadyHostile);
+                            return;
+                        }
+
+                        break;
+                    }
+
+                case SkillTargetType.Party:
+                    {
+                        // TODO ...
+                        if (targetCaster.Type == SkillCastTargetType.Unit || targetCaster.Type == SkillCastTargetType.Doodad)
+                        {
+                            target = targetCaster.ObjId > 0 ? WorldManager.Instance.GetBaseUnit(targetCaster.ObjId) : caster;
+                            targetCaster.ObjId = target.ObjId;
+                        }
+                        else
+                        {
+                            caster.SendErrorMessage(ErrorMessageType.InvalidTarget);
+                        }
+                        break;
+                    }
+
+                case SkillTargetType.Raid:
+                    {
+                        // TODO ...
+                        if (targetCaster.Type == SkillCastTargetType.Unit || targetCaster.Type == SkillCastTargetType.Doodad)
+                        {
+                            target = targetCaster.ObjId > 0 ? WorldManager.Instance.GetBaseUnit(targetCaster.ObjId) : caster;
+                            targetCaster.ObjId = target.ObjId;
+                        }
+                        else
+                        {
+                            caster.SendErrorMessage(ErrorMessageType.InvalidTarget);
+                        }
+                        break;
+                    }
+
+                case SkillTargetType.Hostile:
+                    {
+                        if (targetCaster.Type == SkillCastTargetType.Unit || targetCaster.Type == SkillCastTargetType.Doodad)
+                        {
+                            target = targetCaster.ObjId > 0 ? WorldManager.Instance.GetBaseUnit(targetCaster.ObjId) : caster;
+                            targetCaster.ObjId = target.ObjId;
+                        }
+                        else
+                            caster.SendErrorMessage(ErrorMessageType.InvalidTarget); // TODO ...
+
+                        if (caster.Faction.GetRelationState(target.Faction.Id) != RelationState.Hostile)
+                        {
+                            caster.SendErrorMessage(ErrorMessageType.FactionRelationAlreadyFriendly);
+                            return;
+                        }
+
+                        break;
+                    }
+
+                case SkillTargetType.AnyUnit:
+                    {
+                        if (targetCaster.Type == SkillCastTargetType.Unit || targetCaster.Type == SkillCastTargetType.Doodad)
+                        {
+                            target = targetCaster.ObjId > 0 ? WorldManager.Instance.GetBaseUnit(targetCaster.ObjId) : caster;
+                            targetCaster.ObjId = target.ObjId;
+                        }
+                        else
+                        {
+                            caster.SendErrorMessage(ErrorMessageType.InvalidTarget);
+                        }
+                        break;
+                    }
+                case SkillTargetType.Pos:
+                    {
+                        var positionTarget = (SkillCastPositionTarget)targetCaster;
+                        var positionUnit = new BaseUnit
+                        {
+                            Position = new Point(positionTarget.PosX, positionTarget.PosY, positionTarget.PosZ)
+                            {
+                                ZoneId = caster.Position.ZoneId,
+                                WorldId = caster.Position.WorldId
+                            },
+                            Region = caster.Region
+                        };
+                        target = positionUnit;
+                        break;
+                    }
+                case SkillTargetType.Line:
+                    {
+                        // TODO ...
+                        if (targetCaster.Type == SkillCastTargetType.Unit || targetCaster.Type == SkillCastTargetType.Doodad)
+                        {
+                            target = targetCaster.ObjId > 0 ? WorldManager.Instance.GetBaseUnit(targetCaster.ObjId) : caster;
+                            targetCaster.ObjId = target.ObjId;
+                        }
+                        else
+                        {
+                            caster.SendErrorMessage(ErrorMessageType.InvalidTarget);
+                        }
+                        break;
+                    }
+
+                case SkillTargetType.Doodad:
                 {
-                    target = targetCaster.ObjId > 0 ? WorldManager.Instance.GetBaseUnit(targetCaster.ObjId) : caster;
-                    targetCaster.ObjId = target.ObjId;
-                }
-                else
-                {
-                    // TODO ...
-                    caster.SendErrorMessage(ErrorMessageType.InvalidTarget);
+                    if (targetCaster.Type == SkillCastTargetType.Unit || targetCaster.Type == SkillCastTargetType.Doodad)
+                    {
+                        target = targetCaster.ObjId > 0 ? WorldManager.Instance.GetBaseUnit(targetCaster.ObjId) : caster;
+                        targetCaster.ObjId = target.ObjId;
+                    }
+                    else
+                    {
+                        caster.SendErrorMessage(ErrorMessageType.InvalidDoodadTarget);
+                    }
+                    break;
                 }
 
-                if (caster.Faction.GetRelationState(target.Faction.Id) != RelationState.Friendly)
-                {
-                    caster.SendErrorMessage(ErrorMessageType.FactionRelationAlreadyHostile);
-                    return; //TODO отправлять ошибку?
-                }
-            }
-            else if (Template.TargetType == SkillTargetType.Hostile)
-            {
-                if (targetCaster.Type == SkillCastTargetType.Unit || targetCaster.Type == SkillCastTargetType.Doodad)
-                {
-                    target = targetCaster.ObjId > 0 ? WorldManager.Instance.GetBaseUnit(targetCaster.ObjId) : caster;
-                    targetCaster.ObjId = target.ObjId;
-                }
-                else
-                {
-                    // TODO ...
-                    caster.SendErrorMessage(ErrorMessageType.InvalidTarget);
-                }
+                case SkillTargetType.Item:
+                    {
+                        if (targetCaster.Type == SkillCastTargetType.Unit || targetCaster.Type == SkillCastTargetType.Doodad)
+                        {
+                            target = targetCaster.ObjId > 0 ? WorldManager.Instance.GetBaseUnit(targetCaster.ObjId) : caster;
+                            targetCaster.ObjId = target.ObjId;
+                        }
+                        else
+                        {
+                            caster.SendErrorMessage(ErrorMessageType.InvalidTarget);
+                        }
+                        break;
+                    }
+                case SkillTargetType.Pet:
+                    {
+                        // TODO ...
+                        if (targetCaster.Type == SkillCastTargetType.Unit || targetCaster.Type == SkillCastTargetType.Doodad)
+                        {
+                            target = targetCaster.ObjId > 0 ? WorldManager.Instance.GetBaseUnit(targetCaster.ObjId) : caster;
+                            targetCaster.ObjId = target.ObjId;
+                        }
+                        else
+                        {
+                            caster.SendErrorMessage(ErrorMessageType.InvalidTarget);
+                        }
+                        break;
+                    }
+                case SkillTargetType.BallisticPos:
+                    {
+                        // TODO ...
+                        if (targetCaster.Type == SkillCastTargetType.Unit || targetCaster.Type == SkillCastTargetType.Doodad)
+                        {
+                            target = targetCaster.ObjId > 0 ? WorldManager.Instance.GetBaseUnit(targetCaster.ObjId) : caster;
+                            targetCaster.ObjId = target.ObjId;
+                        }
+                        else
+                        {
+                            caster.SendErrorMessage(ErrorMessageType.InvalidTarget);
+                        }
+                        break;
+                    }
+                case SkillTargetType.SummonPos:
+                    {
+                        // TODO ...
+                        if (targetCaster.Type == SkillCastTargetType.Unit || targetCaster.Type == SkillCastTargetType.Doodad)
+                        {
+                            target = targetCaster.ObjId > 0 ? WorldManager.Instance.GetBaseUnit(targetCaster.ObjId) : caster;
+                            targetCaster.ObjId = target.ObjId;
+                        }
+                        else
+                        {
+                            caster.SendErrorMessage(ErrorMessageType.InvalidTarget);
+                        }
+                        break;
+                    }
+                case SkillTargetType.RelativePos:
+                    {
+                        // TODO ...
+                        if (targetCaster.Type == SkillCastTargetType.Unit || targetCaster.Type == SkillCastTargetType.Doodad)
+                        {
+                            target = targetCaster.ObjId > 0 ? WorldManager.Instance.GetBaseUnit(targetCaster.ObjId) : caster;
+                            targetCaster.ObjId = target.ObjId;
+                        }
+                        else
+                        {
+                            caster.SendErrorMessage(ErrorMessageType.InvalidTarget);
+                        }
+                        break;
+                    }
+                case SkillTargetType.SourcePos:
+                    {
+                        // TODO ...
+                        if (targetCaster.Type == SkillCastTargetType.Unit || targetCaster.Type == SkillCastTargetType.Doodad)
+                        {
+                            target = targetCaster.ObjId > 0 ? WorldManager.Instance.GetBaseUnit(targetCaster.ObjId) : caster;
+                            targetCaster.ObjId = target.ObjId;
+                        }
+                        else
+                        {
+                            caster.SendErrorMessage(ErrorMessageType.InvalidTarget);
+                        }
+                        break;
+                    }
+                case SkillTargetType.ArtilleryPos:
+                    {
+                        // TODO ...
+                        if (targetCaster.Type == SkillCastTargetType.Unit || targetCaster.Type == SkillCastTargetType.Doodad)
+                        {
+                            target = targetCaster.ObjId > 0 ? WorldManager.Instance.GetBaseUnit(targetCaster.ObjId) : caster;
+                            targetCaster.ObjId = target.ObjId;
+                        }
+                        else
+                        {
+                            caster.SendErrorMessage(ErrorMessageType.InvalidTarget);
+                        }
+                        break;
+                    }
 
-                if (caster.Faction.GetRelationState(target.Faction.Id) != RelationState.Hostile)
-                {
-                    caster.SendErrorMessage(ErrorMessageType.FactionRelationAlreadyFriendly);
-                    return; //TODO отправлять ошибку?
-                }
-            }
-            else if (Template.TargetType == SkillTargetType.AnyUnit)
-            {
-                if (targetCaster.Type == SkillCastTargetType.Unit || targetCaster.Type == SkillCastTargetType.Doodad)
-                {
-                    target = targetCaster.ObjId > 0 ? WorldManager.Instance.GetBaseUnit(targetCaster.ObjId) : caster;
-                    targetCaster.ObjId = target.ObjId;
-                }
-                else
-                {
-                    // TODO ...
-                    caster.SendErrorMessage(ErrorMessageType.InvalidTarget);
-                }
-            }
-            else if (Template.TargetType == SkillTargetType.Doodad)
-            {
-                if (targetCaster.Type == SkillCastTargetType.Unit || targetCaster.Type == SkillCastTargetType.Doodad)
-                {
-                    target = targetCaster.ObjId > 0 ? WorldManager.Instance.GetBaseUnit(targetCaster.ObjId) : caster;
-                    targetCaster.ObjId = target.ObjId;
-                }
-                else
-                {
-                    // TODO ...
-                    caster.SendErrorMessage(ErrorMessageType.InvalidDoodadTarget);
-                }
-            }
-            else if (Template.TargetType == SkillTargetType.Item)
-            {
-                // TODO ...
-            }
-            else if (Template.TargetType == SkillTargetType.Others)
-            {
-                if (targetCaster.Type == SkillCastTargetType.Unit || targetCaster.Type == SkillCastTargetType.Doodad)
-                {
-                    target = targetCaster.ObjId > 0 ? WorldManager.Instance.GetBaseUnit(targetCaster.ObjId) : caster;
-                    targetCaster.ObjId = target.ObjId;
-                }
-                else
-                {
-                    // TODO ...
-                    caster.SendErrorMessage(ErrorMessageType.InvalidTarget);
-                }
+                case SkillTargetType.Others:
+                    {
+                        if (targetCaster.Type == SkillCastTargetType.Unit || targetCaster.Type == SkillCastTargetType.Doodad)
+                        {
+                            target = targetCaster.ObjId > 0 ? WorldManager.Instance.GetBaseUnit(targetCaster.ObjId) : caster;
+                            targetCaster.ObjId = target.ObjId;
+                        }
+                        else
+                            caster.SendErrorMessage(ErrorMessageType.InvalidTarget); // TODO ...
 
-                if (caster.ObjId == target.ObjId)
-                {
-                    caster.SendErrorMessage(ErrorMessageType.InvalidTarget);
-                    return; //TODO отправлять ошибку?
-                }
-            }
-            else if (Template.TargetType == SkillTargetType.FriendlyOthers)
-            {
-                if (targetCaster.Type == SkillCastTargetType.Unit || targetCaster.Type == SkillCastTargetType.Doodad)
-                {
-                    target = targetCaster.ObjId > 0 ? WorldManager.Instance.GetBaseUnit(targetCaster.ObjId) : caster;
-                    targetCaster.ObjId = target.ObjId;
-                }
-                else
-                {
-                    // TODO ...
-                    caster.SendErrorMessage(ErrorMessageType.InvalidTarget);
-                }
+                        if (caster.ObjId == target.ObjId)
+                        {
+                            caster.SendErrorMessage(ErrorMessageType.InvalidTarget);
+                            return;
+                        }
 
-                if (caster.ObjId == target.ObjId)
-                {
-                    caster.SendErrorMessage(ErrorMessageType.InvalidTarget);
-                    return; //TODO отправлять ошибку?
-                }
-                if (caster.Faction.GetRelationState(target.Faction.Id) != RelationState.Friendly)
-                {
-                    caster.SendErrorMessage(ErrorMessageType.FactionRelationAlreadyHostile);
-                    return; //TODO отправлять ошибку?
-                }
-            }
-            else if (Template.TargetType == SkillTargetType.Building)
-            {
-                if (targetCaster.Type == SkillCastTargetType.Unit || targetCaster.Type == SkillCastTargetType.Doodad)
-                {
-                    target = targetCaster.ObjId > 0 ? WorldManager.Instance.GetBaseUnit(targetCaster.ObjId) : caster;
-                    targetCaster.ObjId = target.ObjId;
-                }
-                else
-                {
-                    // TODO ...
-                    caster.SendErrorMessage(ErrorMessageType.InvalidTarget);
-                }
+                        break;
+                    }
+                case SkillTargetType.FriendlyOthers:
+                    {
+                        if (targetCaster.Type == SkillCastTargetType.Unit || targetCaster.Type == SkillCastTargetType.Doodad)
+                        {
+                            target = targetCaster.ObjId > 0 ? WorldManager.Instance.GetBaseUnit(targetCaster.ObjId) : caster;
+                            targetCaster.ObjId = target.ObjId;
+                        }
+                        else
+                            caster.SendErrorMessage(ErrorMessageType.InvalidTarget); // TODO ...
 
-                if (caster.ObjId == target.ObjId)
-                {
-                    caster.SendErrorMessage(ErrorMessageType.InvalidTarget);
-                    return; //TODO отправлять ошибку?
-                }
-            }
-            else if (Template.TargetType == SkillTargetType.Pos)
-            {
-                var positionTarget = (SkillCastPositionTarget)targetCaster;
-                var positionUnit = new BaseUnit();
-                positionUnit.Position = new Point(positionTarget.PosX, positionTarget.PosY, positionTarget.PosZ);
-                positionUnit.Position.ZoneId = caster.Position.ZoneId;
-                positionUnit.Position.WorldId = caster.Position.WorldId;
-                positionUnit.Region = caster.Region;
-                target = positionUnit;
-            }
-            else
-            {
-                // TODO ...
-                caster.SendErrorMessage(ErrorMessageType.InvalidTarget);
+                        if (caster.ObjId == target.ObjId)
+                        {
+                            caster.SendErrorMessage(ErrorMessageType.InvalidTarget);
+                            return;
+                        }
+                        if (caster.Faction.GetRelationState(target.Faction.Id) != RelationState.Friendly)
+                        {
+                            caster.SendErrorMessage(ErrorMessageType.FactionRelationAlreadyHostile);
+                            return;
+                        }
+
+                        break;
+                    }
+                case SkillTargetType.CursorPos:
+                    {
+                        // TODO ...
+                        if (targetCaster.Type == SkillCastTargetType.Unit || targetCaster.Type == SkillCastTargetType.Doodad)
+                        {
+                            target = targetCaster.ObjId > 0 ? WorldManager.Instance.GetBaseUnit(targetCaster.ObjId) : caster;
+                            targetCaster.ObjId = target.ObjId;
+                        }
+                        else
+                        {
+                            caster.SendErrorMessage(ErrorMessageType.InvalidTarget);
+                        }
+                        break;
+                    }
+                case SkillTargetType.Building:
+                    {
+                        if (targetCaster.Type == SkillCastTargetType.Unit || targetCaster.Type == SkillCastTargetType.Doodad)
+                        {
+                            target = targetCaster.ObjId > 0 ? WorldManager.Instance.GetBaseUnit(targetCaster.ObjId) : caster;
+                            targetCaster.ObjId = target.ObjId;
+                        }
+                        else
+                            caster.SendErrorMessage(ErrorMessageType.InvalidTarget); // TODO ...
+
+                        if (caster.ObjId == target.ObjId)
+                        {
+                            caster.SendErrorMessage(ErrorMessageType.InvalidTarget);
+                            return;
+                        }
+
+                        break;
+                    }
+                default:
+                    caster.SendErrorMessage(ErrorMessageType.InvalidTarget); // TODO ...
+                    break;
             }
 
             TlId = (ushort)TlIdManager.Instance.GetNextId();
@@ -220,27 +373,31 @@ namespace AAEmu.Game.Models.Game.Skills
             if (Template.Plot != null)
             {
                 var eventTemplate = Template.Plot.EventTemplate;
-                var step = new PlotStep();
-                step.Event = eventTemplate;
-                step.Flag = 2;
+                var step = new PlotStep
+                {
+                    Event = eventTemplate,
+                    Flag = 2
+                };
 
                 if (!eventTemplate.СheckСonditions(caster, casterCaster, target, targetCaster, skillObject))
                     step.Flag = 0;
 
                 var res = true;
+
                 if (step.Flag != 0)
                 {
                     var callCounter = new Dictionary<uint, int>();
                     callCounter.Add(step.Event.Id, 1);
+
                     foreach (var evnt in eventTemplate.NextEvents)
                         res = res && BuildPlot(caster, casterCaster, target, targetCaster, skillObject, evnt, step, callCounter);
-
                 }
 
                 ParsePlot(caster, casterCaster, target, targetCaster, skillObject, step);
-
                 if (!res)
                     return;
+
+                caster.BroadcastPacket(new SCPlotEndedPacket(TlId), true);
 
                 TlIdManager.Instance.ReleaseId(TlId);
                 //TlId = 0;
@@ -250,8 +407,8 @@ namespace AAEmu.Game.Models.Game.Skills
                 if (Template.CastingTime > 0)
                 {
                     caster.BroadcastPacket(new SCSkillStartedPacket(Id, TlId, casterCaster, targetCaster, this, skillObject), true);
-                    caster.SkillTask = new CastTask(this, caster, casterCaster, target, targetCaster, skillObject);
 
+                    caster.SkillTask = new CastTask(this, caster, casterCaster, target, targetCaster, skillObject);
                     TaskManager.Instance.Schedule(caster.SkillTask, TimeSpan.FromMilliseconds(Template.CastingTime));
                 }
                 else if (caster is Character && (Id == 2 || Id == 3 || Id == 4) && !caster.IsAutoAttack)
@@ -265,7 +422,6 @@ namespace AAEmu.Game.Models.Game.Skills
                 }
                 else
                     Cast(caster, casterCaster, target, targetCaster, skillObject);
-
             }
         }
 
@@ -275,15 +431,13 @@ namespace AAEmu.Game.Models.Game.Skills
             {
                 var nextCount = counter[nextEvent.Event.Id] + 1;
                 if (nextCount > nextEvent.Event.Tickets)
-                {
                     return true;
-                }
+
                 counter[nextEvent.Event.Id] = nextCount;
             }
             else
-            {
                 counter.Add(nextEvent.Event.Id, 1);
-            }
+
 
             if (nextEvent.Delay > 0)
             {
@@ -302,32 +456,31 @@ namespace AAEmu.Game.Models.Game.Skills
                 return false;
             }
 
-            var step = new PlotStep();
-            step.Event = nextEvent.Event;
-            step.Flag = 2;
-            step.Casting = nextEvent.Casting;
-            step.Channeling = nextEvent.Channeling;
+            var step = new PlotStep
+            {
+                Event = nextEvent.Event,
+                Flag = 2,
+                Casting = nextEvent.Casting,
+                Channeling = nextEvent.Channeling
+            };
 
             foreach (var condition in nextEvent.Event.Conditions)
             {
                 if (condition.Condition.Check(caster, casterCaster, target, targetCaster, skillObject))
-                {
                     continue;
-                }
+
                 step.Flag = 0;
                 break;
             }
 
             baseStep.Steps.AddLast(step);
             if (step.Flag == 0)
-            {
                 return true;
-            }
+
             var res = true;
-            foreach (var e in nextEvent.Event.NextEvents)
-            {
-                res = res && BuildPlot(caster, casterCaster, target, targetCaster, skillObject, e, step, counter);
-            }
+            foreach (var evnt in nextEvent.Event.NextEvents)
+                res = res && BuildPlot(caster, casterCaster, target, targetCaster, skillObject, evnt, step, counter);
+
             return res;
         }
 
@@ -339,9 +492,8 @@ namespace AAEmu.Game.Models.Game.Skills
                 {
                     var template = SkillManager.Instance.GetEffectTemplate(eff.ActualId, eff.ActualType);
                     if (template is BuffEffect)
-                    {
                         step.Flag = 6;
-                    }
+
                     template.Apply(caster, casterCaster, target, targetCaster, new CastPlot(step.Event.PlotId, TlId, step.Event.Id, Template.Id), this, skillObject, DateTime.Now);
                 }
             }
@@ -352,9 +504,7 @@ namespace AAEmu.Game.Models.Game.Skills
             caster.BroadcastPacket(new SCPlotEventPacket(caster, TlId, step.Event.Id, Template.Id, caster.ObjId, target.ObjId, unkId, time, step.Flag, step.Event.Position), true);
 
             foreach (var st in step.Steps)
-            {
                 ParsePlot(caster, casterCaster, target, targetCaster, skillObject, st);
-            }
         }
 
         public void Cast(Unit caster, SkillCaster casterCaster, BaseUnit target, SkillCastTarget targetCaster, SkillObject skillObject)
@@ -477,35 +627,35 @@ namespace AAEmu.Game.Models.Game.Skills
             {
                 foreach (var target in targets)
                 {
-                    if (effect.StartLevel > caster.Level || effect.EndLevel < caster.Level)
-                        continue;
+                    //if (effect.StartLevel > caster.Level || effect.EndLevel < caster.Level)
+                    //    continue;
 
-                    if (effect.Friendly && !effect.NonFriendly && caster.Faction.GetRelationState(target.Faction.Id) != RelationState.Friendly)
-                        continue;
+                    //if (effect.Friendly && !effect.NonFriendly && caster.Faction.GetRelationState(target.Faction.Id) != RelationState.Friendly)
+                    //    continue;
 
-                    if (!effect.Friendly && effect.NonFriendly && caster.Faction.GetRelationState(target.Faction.Id) != RelationState.Hostile)
-                        continue;
+                    //if (!effect.Friendly && effect.NonFriendly && caster.Faction.GetRelationState(target.Faction.Id) != RelationState.Hostile)
+                    //    continue;
 
-                    if (effect.Front && !effect.Back && !MathUtil.IsFront(caster, target))
-                        continue;
+                    //if (effect.Front && !effect.Back && !MathUtil.IsFront(caster, target))
+                    //    continue;
 
-                    if (!effect.Front && effect.Back && MathUtil.IsFront(caster, target))
-                        continue;
+                    //if (!effect.Front && effect.Back && MathUtil.IsFront(caster, target))
+                    //    continue;
 
-                    if (effect.SourceBuffTagId > 0 && !caster.Effects.CheckBuffs(SkillManager.Instance.GetBuffsByTagId(effect.SourceBuffTagId)))
-                        continue;
+                    //if (effect.SourceBuffTagId > 0 && !caster.Effects.CheckBuffs(SkillManager.Instance.GetBuffsByTagId(effect.SourceBuffTagId)))
+                    //    continue;
 
-                    if (effect.SourceNoBuffTagId > 0 && caster.Effects.CheckBuffs(SkillManager.Instance.GetBuffsByTagId(effect.SourceNoBuffTagId)))
-                        continue;
+                    //if (effect.SourceNoBuffTagId > 0 && caster.Effects.CheckBuffs(SkillManager.Instance.GetBuffsByTagId(effect.SourceNoBuffTagId)))
+                    //    continue;
 
-                    if (effect.TargetBuffTagId > 0 && !target.Effects.CheckBuffs(SkillManager.Instance.GetBuffsByTagId(effect.TargetBuffTagId)))
-                        continue;
+                    //if (effect.TargetBuffTagId > 0 && !target.Effects.CheckBuffs(SkillManager.Instance.GetBuffsByTagId(effect.TargetBuffTagId)))
+                    //    continue;
 
-                    if (effect.TargetNoBuffTagId > 0 && target.Effects.CheckBuffs(SkillManager.Instance.GetBuffsByTagId(effect.TargetNoBuffTagId)))
-                        continue;
+                    //if (effect.TargetNoBuffTagId > 0 && target.Effects.CheckBuffs(SkillManager.Instance.GetBuffsByTagId(effect.TargetNoBuffTagId)))
+                    //    continue;
 
-                    if (effect.Chance < 100 && Rand.Next(100) > effect.Chance)
-                        continue;
+                    //if (effect.Chance < 100 && Rand.Next(100) > effect.Chance)
+                    //    continue;
 
                     if (caster is Character character && effect.ConsumeItemId != 0 && effect.ConsumeItemCount > 0)
                     {

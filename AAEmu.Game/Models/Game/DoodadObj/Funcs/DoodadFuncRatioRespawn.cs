@@ -48,7 +48,10 @@ namespace AAEmu.Game.Models.Game.DoodadObj.Funcs
                 npcSpawner.Position = character.Position.Clone();
                 npcSpawner.Position.X = newX + Rand.Next(-2, 2);
                 npcSpawner.Position.Y = newY + Rand.Next(-2, 2);
-                npcSpawner.Position.Z = WorldManager.Instance.GetHeight(npcSpawner.Position.ZoneId, npcSpawner.Position.X, npcSpawner.Position.Y);
+                npcSpawner.Position.Z = AppConfiguration.Instance.HeightMapsEnable
+                    ? WorldManager.Instance.GetHeight(npcSpawner.Position.ZoneId, npcSpawner.Position.X,
+                        npcSpawner.Position.Y)
+                    : npcSpawner.Position.Z;
                 // looks in the direction of the character
                 var angle = MathUtil.CalculateAngleFrom(npcSpawner.Position.X, npcSpawner.Position.Y, character.Position.X, character.Position.Y);
                 var rotZ = MathUtil.ConvertDegreeToDirection(angle);

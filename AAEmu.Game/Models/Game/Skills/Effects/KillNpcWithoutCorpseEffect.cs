@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using AAEmu.Game.Core.Managers.World;
 using AAEmu.Game.Models.Game.NPChar;
 using AAEmu.Game.Models.Game.Skills.Templates;
@@ -18,7 +18,7 @@ namespace AAEmu.Game.Models.Game.Skills.Effects
         public override void Apply(Unit caster, SkillCaster casterObj, BaseUnit target, SkillCastTarget targetObj, CastAction castObj,
             Skill skill, SkillObject skillObject, DateTime time)
         {
-            _log.Debug("KillNpcWithoutCorpseEffect");
+            Log.Debug("KillNpcWithoutCorpseEffect");
             var npcs = WorldManager.Instance.GetAround<Npc>(target, Radius);
             foreach (var npc in npcs)
             {

@@ -45,7 +45,7 @@ namespace AAEmu.Game.Core.Managers
         public void RunUpdate(string updateFile)
         {
 
-            string[] result = Regex.Split(File.ReadAllText(Path.Combine("sql", updateFile)), @"([^\\];)");
+            var result = Regex.Split(File.ReadAllText(Path.Combine("sql", updateFile)), @"([^\\];)");
             try
             {
                 using (var connection = MySQL.CreateConnection())
@@ -86,7 +86,7 @@ namespace AAEmu.Game.Core.Managers
             {
                 using (var connection = MySQL.CreateConnection())
                 {
-                    MySqlTransaction transaction = connection.BeginTransaction();
+                    var transaction = connection.BeginTransaction();
 
                     // recovery autocommit
                     using (var cmd = connection.CreateCommand())

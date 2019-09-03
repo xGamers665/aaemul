@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using AAEmu.Commons.Utils;
 using AAEmu.Game.Core.Packets.G2C;
 using AAEmu.Game.Models.Game.Skills.Templates;
@@ -32,7 +32,7 @@ namespace AAEmu.Game.Models.Game.Skills.Effects
         public override void Apply(Unit caster, SkillCaster casterObj, BaseUnit target, SkillCastTarget targetObj, CastAction castObj,
             Skill skill, SkillObject skillObject, DateTime time)
         {
-            _log.Debug("HealEffect");
+            Log.Debug("HealEffect");
 
             if (!(target is Unit))
                 return;

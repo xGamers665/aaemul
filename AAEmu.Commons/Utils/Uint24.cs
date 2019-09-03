@@ -37,7 +37,7 @@ namespace AAEmu.Commons.Utils
 
         public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj))
+            if (obj is null)
             {
                 return false;
             }
@@ -60,9 +60,9 @@ namespace AAEmu.Commons.Utils
             {
                 return $"{_val}";
             }
-            char[] bits = new char[24];
-            uint val = _val;
-            for (int i = 0; val != 0; i++)
+            var bits = new char[24];
+            var val = _val;
+            for (var i = 0; val != 0; i++)
             {
                 bits[i] = (val & 1) == 1 ? '1' : '0';
                 val >>= 1;
@@ -95,7 +95,7 @@ namespace AAEmu.Commons.Utils
                     _val = value;
                     return;
                 }
-                byte[] newVal = BitConverter.GetBytes(_val);
+                var newVal = BitConverter.GetBytes(_val);
                 newVal[idx] = value;
                 Update(newVal);
             }

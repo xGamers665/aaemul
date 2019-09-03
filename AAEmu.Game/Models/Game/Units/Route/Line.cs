@@ -116,7 +116,7 @@ namespace AAEmu.Game.Models.Game.Units.Route
             // Change the NPC coordinates
             moveType.X = npc.Position.X;
             moveType.Y = npc.Position.Y;
-            moveType.Z = WorldManager.Instance.GetHeight(npc.Position.ZoneId, npc.Position.X, npc.Position.Y);
+            moveType.Z = AppConfiguration.Instance.HeightMapsEnable ? WorldManager.Instance.GetHeight(npc.Position.ZoneId, npc.Position.X, npc.Position.Y) : npc.Position.Z;
 
             // looks in the direction of movement
             var angle = MathUtil.CalculateAngleFrom(npc.Position.X, npc.Position.Y, Position.X, Position.Y);

@@ -2,7 +2,6 @@
 using AAEmu.Game.Core.Managers;
 using AAEmu.Game.Core.Network.Game;
 using AAEmu.Game.Models.Game.Error;
-using AAEmu.Game.Models.Game.Items;
 using AAEmu.Game.Models.Game.Skills;
 using AAEmu.Game.Utils;
 
@@ -17,7 +16,6 @@ namespace AAEmu.Game.Core.Packets.C2G
         public override void Read(PacketStream stream)
         {
             Skill skill;
-            Item item;
             var skillId = stream.ReadUInt32();
 
             var skillCasterType = stream.ReadByte(); // who applies
@@ -37,7 +35,7 @@ namespace AAEmu.Game.Core.Packets.C2G
 
             if (skillCaster is SkillItem)
             {
-                item = Connection.ActiveChar.Inventory.GetItem(((SkillItem)skillCaster).ItemId);
+                var item = Connection.ActiveChar.Inventory.GetItem(((SkillItem)skillCaster).ItemId);
                 if (item == null || skillId != item.Template.UseSkillId)
                 {
                     Connection.ActiveChar.SendErrorMessage(ErrorMessageType.FailedToUseItem);
@@ -48,6 +46,8 @@ namespace AAEmu.Game.Core.Packets.C2G
                 skill = new Skill(SkillManager.Instance.GetSkillTemplate(skillId));
 
                 //InventoryHelper.AddItemAndUpdateClient(Connection.ActiveChar, item);
+                if (Connection.ActiveChar.Item != null)
+                    InventoryHelper.RemoveItemAndUpdateClient(Connection.ActiveChar, Connection.ActiveChar.Item, 1);
             }
             else if (SkillManager.Instance.IsDefaultSkill(skillId) || SkillManager.Instance.IsCommonSkill(skillId))
             {
@@ -66,9 +66,6 @@ namespace AAEmu.Game.Core.Packets.C2G
             }
 
             skill.Use(Connection.ActiveChar, skillCaster, skillCastTarget, skillObject);
-
-            if (Connection.ActiveChar.Item != null)
-                InventoryHelper.RemoveItemAndUpdateClient(Connection.ActiveChar, Connection.ActiveChar.Item, 1);
 
             //if (SkillManager.Instance.IsDefaultSkill(skillId) || SkillManager.Instance.IsCommonSkill(skillId))
             //{

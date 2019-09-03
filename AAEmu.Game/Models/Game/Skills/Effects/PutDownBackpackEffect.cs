@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using AAEmu.Game.Models.Game.Char;
 using AAEmu.Game.Models.Game.DoodadObj;
 using AAEmu.Game.Models.Game.Items;
@@ -17,15 +17,15 @@ namespace AAEmu.Game.Models.Game.Skills.Effects
         public override void Apply(Unit caster, SkillCaster casterObj, BaseUnit target, SkillCastTarget targetObj, CastAction castObj,
             Skill skill, SkillObject skillObject, DateTime time)
         {
-            _log.Debug("PutDownBackpackEffect");
+            Log.Debug("PutDownBackpackEffect");
 
-            Character character = (Character)caster;
+            var character = (Character)caster;
             if (character == null) return;
 
-            SkillItem packItem = (SkillItem) casterObj;
+            var packItem = (SkillItem) casterObj;
             if (packItem == null) return;
 
-            Item item = character.Inventory.GetItem(packItem.ItemId);
+            var item = character.Inventory.GetItem(packItem.ItemId);
             if (item == null) return;
 
             InventoryHelper.RemoveItemAndUpdateClient(character, item, 1);

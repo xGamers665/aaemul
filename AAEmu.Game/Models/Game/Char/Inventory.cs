@@ -490,12 +490,12 @@ namespace AAEmu.Game.Models.Game.Char
             var slot = 0;
             if (type == SlotType.Inventory)
             {
-                for (int i = 0; i < Owner.NumInventorySlots; i++)
+                for (var i = 0; i < Owner.NumInventorySlots; i++)
                     if (Items[i] == null) slot++;
             }
             else if (type == SlotType.Bank)
             {
-                for (int i = 0; i < Owner.NumBankSlots; i++)
+                for (var i = 0; i < Owner.NumBankSlots; i++)
                     if (Bank[i] == null) slot++;
             }
 

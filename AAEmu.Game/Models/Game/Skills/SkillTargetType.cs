@@ -1,5 +1,9 @@
-namespace AAEmu.Game.Models.Game.Skills
+﻿namespace AAEmu.Game.Models.Game.Skills
 {
+    // by Nut
+    /*
+     * -SkillTargetType: The relationship or targeting type the caster's target must meet to cast the skill.
+     */
     public enum SkillTargetType : byte
     {
         Self = 0,

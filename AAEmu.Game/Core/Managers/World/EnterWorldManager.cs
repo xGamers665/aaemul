@@ -76,7 +76,7 @@ namespace AAEmu.Game.Core.Managers.World
                     if (connection.State == GameState.World)
                     {
                         var delay = 10;
-                        if (connection.ActiveChar.IsInBattle == true)
+                        if (connection.ActiveChar.IsInBattle)
                             delay = 20;
 
                         connection.SendPacket(new SCPrepareLeaveWorldPacket(delay * 1000, type, false));

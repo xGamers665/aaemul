@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using AAEmu.Game.Core.Managers;
 using AAEmu.Game.Core.Managers.World;
 using AAEmu.Game.Core.Network.Game;
 using AAEmu.Game.Core.Packets.G2C;
 using AAEmu.Game.Models.Game.Char;
 using AAEmu.Game.Models.Game.Formulas;
-using AAEmu.Game.Models.Game.Items;
-using AAEmu.Game.Models.Game.Mate;
 using AAEmu.Game.Models.Game.NPChar;
 
 namespace AAEmu.Game.Models.Game.Units

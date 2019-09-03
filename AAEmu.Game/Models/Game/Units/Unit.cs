@@ -16,17 +16,19 @@ namespace AAEmu.Game.Models.Game.Units
 {
     public class Unit : BaseUnit
     {
+        //protected static readonly Logger Log = LogManager.GetCurrentClassLogger();
+
         private Task _regenTask;
         public uint ModelId { get; set; }
         public byte Level { get; set; }
         public int Hp { get; set; }
         public virtual int MaxHp { get; set; }
         public virtual int HpRegen { get; set; }
-        public virtual int PersistentHpRegen { get; set; } = 30;
+        public virtual int PersistentHpRegen { get; set; }
         public int Mp { get; set; }
         public virtual int MaxMp { get; set; }
         public virtual int MpRegen { get; set; }
-        public virtual int PersistentMpRegen { get; set; } = 30;
+        public virtual int PersistentMpRegen { get; set; }
         public virtual float LevelDps { get; set; }
         public virtual int Dps { get; set; }
         public virtual int DpsInc { get; set; }
@@ -75,18 +77,32 @@ namespace AAEmu.Game.Models.Game.Units
 
         public virtual void ReduceCurrentHp(Unit attacker, int value)
         {
-            if (Hp <= 0)
-                return;
+            //if (Hp <= 0) // не дасть выполнить Dodie
+            //    return;
+
             Hp = Math.Max(Hp - value, 0);
             if (Hp <= 0)
             {
+                StopRegen();
                 DoDie(attacker);
-                //StopRegen();
+                return;
             }
-            else
+
+            StartRegen();
+            BroadcastPacket(new SCUnitPointsPacket(ObjId, Hp, Hp > 0 ? Mp : 0), true);
+        }
+        public virtual void ReduceCurrentMp(Unit attacker, int value)
+        {
+            if (Hp <= 0) // если юнит мертв, то не надо менять MP
+                return;
+
+            Mp = Math.Max(Mp - value, 0);
+            if (Mp >= MaxMp)
             {
-                //StartRegen();
+                //StopRegen(); // нельзя останавливать реген, в этот момент может быть 0 < HP < MaxHp
+                return;
             }
+            StartRegen();
             BroadcastPacket(new SCUnitPointsPacket(ObjId, Hp, Hp > 0 ? Mp : 0), true);
         }
 
@@ -94,11 +110,10 @@ namespace AAEmu.Game.Models.Game.Units
         {
             Effects.RemoveEffectsOnDeath();
             killer.BroadcastPacket(new SCUnitDeathPacket(ObjId, 1, killer), true);
+
             var lootDropItems = ItemManager.Instance.CreateLootDropItems(ObjId);
             if (lootDropItems.Count > 0)
-            {
                 killer.BroadcastPacket(new SCLootableStatePacket(ObjId, true), true);
-            }
 
             if (CurrentTarget != null)
             {
@@ -113,11 +128,10 @@ namespace AAEmu.Game.Models.Game.Units
                 if (killer is Character character)
                 {
                     character.StopAutoSkill(character);
+                    character.IsInBattle = false; // нам надо, чтобы у персонажа стало "не в бою"
                 }
                 else
-                {
                     killer.StopAutoSkill((Unit)killer.CurrentTarget);
-                }
 
                 killer.CurrentTarget = null;
             }
@@ -126,9 +140,7 @@ namespace AAEmu.Game.Models.Game.Units
         private async void StopAutoSkill(Unit character)
         {
             if (!(character is Character) || character.AutoAttackTask == null)
-            {
                 return;
-            }
 
             await character.AutoAttackTask.Cancel();
             character.AutoAttackTask = null;
@@ -140,10 +152,9 @@ namespace AAEmu.Game.Models.Game.Units
 
         public void StartRegen()
         {
-            if (_regenTask != null || Hp >= MaxHp && Mp >= MaxMp || Hp == 0)
-            {
+            if (_regenTask != null || Hp >= MaxHp && Mp >= MaxMp || Hp <= 0)
                 return;
-            }
+
             _regenTask = new UnitPointsRegenTask(this);
             TaskManager.Instance.Schedule(_regenTask, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
         }
@@ -151,9 +162,8 @@ namespace AAEmu.Game.Models.Game.Units
         public async void StopRegen()
         {
             if (_regenTask == null)
-            {
                 return;
-            }
+
             await _regenTask.Cancel();
             _regenTask = null;
         }
@@ -180,16 +190,13 @@ namespace AAEmu.Game.Models.Game.Units
         public override void RemoveBonus(uint bonusIndex, UnitAttribute attribute)
         {
             if (!Bonuses.ContainsKey(bonusIndex))
-            {
                 return;
-            }
+
             var bonuses = Bonuses[bonusIndex];
             foreach (var bonus in new List<Bonus>(bonuses))
             {
                 if (bonus.Template != null && bonus.Template.Attribute == attribute)
-                {
                     bonuses.Remove(bonus);
-                }
             }
         }
 
@@ -197,17 +204,14 @@ namespace AAEmu.Game.Models.Game.Units
         {
             var result = new List<Bonus>();
             if (Bonuses == null)
-            {
                 return result;
-            }
+
             foreach (var bonuses in new List<List<Bonus>>(Bonuses.Values))
             {
                 foreach (var bonus in new List<Bonus>(bonuses))
                 {
                     if (bonus.Template != null && bonus.Template.Attribute == attribute)
-                    {
                         result.Add(bonus);
-                    }
                 }
             }
             return result;

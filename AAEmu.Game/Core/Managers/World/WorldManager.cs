@@ -6,6 +6,7 @@ using System.Linq;
 using AAEmu.Commons.IO;
 using AAEmu.Commons.Utils;
 using AAEmu.Game.Core.Network.Game;
+using AAEmu.Game.Models;
 using AAEmu.Game.Models.Game.Char;
 using AAEmu.Game.Models.Game.DoodadObj;
 using AAEmu.Game.Models.Game.NPChar;
@@ -114,8 +115,7 @@ namespace AAEmu.Game.Core.Managers.World
                     throw new Exception($"WorldManager: Parse {pathFile} file");
             }
 
-            var active = true;
-            if (active) // TODO fastboot if active = false!
+            if (AppConfiguration.Instance.HeightMapsEnable) // TODO fastboot if HeightMapsEnable = false!
             {
                 _log.Info("Loading heightmaps...");
 
@@ -142,21 +142,21 @@ namespace AAEmu.Game.Core.Managers.World
                             if (hMapCellX == world.CellX && hMapCellY == world.CellY)
                             {
                                 for (var cellX = 0; cellX < world.CellX; cellX++)
-                                for (var cellY = 0; cellY < world.CellY; cellY++)
-                                {
-                                    if (br.ReadBoolean())
-                                        continue;
-                                    for (var i = 0; i < 16; i++)
-                                    for (var j = 0; j < 16; j++)
-                                    for (var x = 0; x < 32; x++)
-                                    for (var y = 0; y < 32; y++)
+                                    for (var cellY = 0; cellY < world.CellY; cellY++)
                                     {
-                                        var sx = cellX * 512 + i * 32 + x;
-                                        var sy = cellY * 512 + j * 32 + y;
+                                        if (br.ReadBoolean())
+                                            continue;
+                                        for (var i = 0; i < 16; i++)
+                                            for (var j = 0; j < 16; j++)
+                                                for (var x = 0; x < 32; x++)
+                                                    for (var y = 0; y < 32; y++)
+                                                    {
+                                                        var sx = cellX * 512 + i * 32 + x;
+                                                        var sy = cellY * 512 + j * 32 + y;
 
-                                        world.HeightMaps[sx, sy] = br.ReadUInt16();
+                                                        world.HeightMaps[sx, sy] = br.ReadUInt16();
+                                                    }
                                     }
-                                }
                             }
                             else
                                 _log.Warn("{0}: Invalid heightmap cells...", world.Name);
@@ -293,7 +293,7 @@ namespace AAEmu.Game.Core.Managers.World
         public Character GetCharacterById(uint id)
         {
             foreach (var player in _characters.Values)
-                if (player.Id.Equals(id)) 
+                if (player.Id.Equals(id))
                     return player;
             return null;
         }

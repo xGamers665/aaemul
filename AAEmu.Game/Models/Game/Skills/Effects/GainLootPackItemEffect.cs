@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using AAEmu.Commons.Utils;
 using AAEmu.Game.Core.Managers;
@@ -35,7 +35,7 @@ namespace AAEmu.Game.Models.Game.Skills.Effects
             var lootGroups = ItemManager.Instance.GetLootGroups(LootPackId);
             var lootPackItem = character.Inventory.GetItem(lootPack.ItemId);
 
-            _log.Debug("LootGroups {0}", lootGroups);
+            Log.Debug("LootGroups {0}", lootGroups);
 
             var rowG = lootGroups.Length;
             var rowP = lootPacks.Length;
@@ -162,7 +162,7 @@ namespace AAEmu.Game.Models.Game.Skills.Effects
                 }
             }
 
-            _log.Debug("GainLootPackItemEffect {0}", LootPackId);
+            Log.Debug("GainLootPackItemEffect {0}", LootPackId);
         }
 
         private void AddGold(Unit caster, int goldMin, int goldMax)

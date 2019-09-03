@@ -19,7 +19,7 @@ namespace AAEmu.Game.Models.Game.DoodadObj.Funcs
             var func = DoodadManager.Instance.GetFunc(owner.FuncGroupId, skillId);
             if (func?.SoundId > 0)
             {
-                owner.BroadcastPacket(new SCDoodadSoundPacket(owner, func.SoundId), true); // добавил? так как у некоторых Doodad есть звук
+                owner.BroadcastPacket(new SCDoodadSoundPacket(owner, func.SoundId), true); // добавил, так как у некоторых Doodad есть звук
             }
             // выполняем действие
             //owner.BroadcastPacket(new SCDoodadPhaseChangedPacket(owner), true);

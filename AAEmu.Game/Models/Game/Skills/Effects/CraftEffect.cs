@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using AAEmu.Game.Core.Managers.World;
 using AAEmu.Game.Core.Packets.G2C;
 using AAEmu.Game.Models.Game.Char;
@@ -19,7 +19,7 @@ namespace AAEmu.Game.Models.Game.Skills.Effects
             CastAction castObj,
             Skill skill, SkillObject skillObject, DateTime time)
         {
-            _log.Debug("CraftEffect, {0}", WorldInteraction);
+            Log.Debug("CraftEffect, {0}", WorldInteraction);
 
             var wiGroup = WorldManager.Instance.GetWorldInteractionGroup((uint)WorldInteraction);
             if (caster is Character character)
@@ -56,7 +56,7 @@ namespace AAEmu.Game.Models.Game.Skills.Effects
 
                         break;
                     default:
-                        _log.Warn("CraftEffect, {0} not have wi group", WorldInteraction);
+                        Log.Warn("CraftEffect, {0} not have wi group", WorldInteraction);
                         break;
                 }
 

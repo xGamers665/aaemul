@@ -4,7 +4,7 @@ namespace AAEmu.Game.Models.Tasks.LaborPower
 {
     public class LaborPowerTickStartTask : Task
     {
-        protected uint _id;
+        private uint _id;
         public LaborPowerTickStartTask(uint id)
         {
             _id = id;

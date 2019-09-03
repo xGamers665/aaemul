@@ -1,8 +1,5 @@
 ﻿using System;
-using AAEmu.Game.Core.Managers.World;
 using AAEmu.Game.Core.Network.Game;
-using AAEmu.Game.Core.Packets.G2C;
-using AAEmu.Game.Models.Game.Char;
 using AAEmu.Game.Models.Tasks.LaborPower;
 using AAEmu.Game.Utils.DB;
 using MySql.Data.MySqlClient;
@@ -12,7 +9,11 @@ namespace AAEmu.Game.Models.Game.LaborPower
 {
     public class LaborPower
     {
-        protected static readonly Logger Log = LogManager.GetCurrentClassLogger();
+        /*
+         *
+         */
+
+        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
         public uint Id { get; set; }
         public uint AccountId { get; set; }
@@ -21,10 +22,11 @@ namespace AAEmu.Game.Models.Game.LaborPower
         public int ConsumedLaborPower { get; set; }
         public DateTime Updated { get; set; }
         public LaborPowerTickStartTask LpTickStartTask { get; set; }
-        public bool Started { get; set; } = false;
+        public bool IsStarted { get; set; } = false;
 
-        private const short LpChangePremium = 10;
+        private const short LpChangePremium = 10; // TODO in config
         private const short LpChange = 5;
+        private const short LpMax = 2000;
 
         public LaborPower()
         {
@@ -49,7 +51,8 @@ namespace AAEmu.Game.Models.Game.LaborPower
 
         public static LaborPower Load(MySqlConnection connection, uint characterId)
         {
-            LaborPower character = null;
+            var character = new LaborPower();
+
             using (var command = connection.CreateCommand())
             {
                 command.Connection = connection;
@@ -68,9 +71,6 @@ namespace AAEmu.Game.Models.Game.LaborPower
                     }
                 }
             }
-
-            if (character == null)
-                return null;
 
             return character;
         }

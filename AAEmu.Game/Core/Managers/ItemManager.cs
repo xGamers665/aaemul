@@ -116,7 +116,7 @@ namespace AAEmu.Game.Core.Managers
                 return items;
             }
             items = new List<Item>();
-            ulong itemId = ((ulong)npcId << 32) + 65536;
+            var itemId = ((ulong)npcId << 32) + 65536;
             foreach (var lootPackDroppingNpc in lootPackDroppingNpcs)
             {
                 var lootPacks = GetLootPacks(lootPackDroppingNpc.LootPackId);
@@ -131,7 +131,7 @@ namespace AAEmu.Game.Core.Managers
                 {
                     if (lootPacks[uii].DropRate + dropRateItemId >= dropRateItem)
                     {
-                        Item item = new Item();
+                        var item = new Item();
                         item.TemplateId = lootPacks[uii].ItemId;
                         item.WorldId = 1;
                         item.CreateTime = DateTime.Now;

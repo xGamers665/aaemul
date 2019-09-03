@@ -11,7 +11,7 @@ namespace AAEmu.Game.Core.Managers
 {
     public class LaborPowerManager : Singleton<LaborPowerManager>
     {
-        protected static readonly Logger Log = LogManager.GetCurrentClassLogger();
+        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
         private readonly ConcurrentDictionary<uint, GameConnection> _accounts;
 
@@ -30,8 +30,9 @@ namespace AAEmu.Game.Core.Managers
         public void LaborPowerTickStart(uint id)
         {
             Log.Warn("LaborPowerTickStart: Started");
-            var LpTickStartTask = new LaborPowerTickStartTask(id);
-            TaskManager.Instance.Schedule(LpTickStartTask, TimeSpan.FromMinutes(Delay));
+
+            var lpTickStartTask = new LaborPowerTickStartTask(id);
+            TaskManager.Instance.Schedule(lpTickStartTask, TimeSpan.FromMinutes(Delay));
         }
 
     }

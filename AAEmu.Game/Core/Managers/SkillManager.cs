@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using AAEmu.Commons.Utils;
 using AAEmu.Game.Models.Game.Skills;
@@ -70,7 +70,13 @@ namespace AAEmu.Game.Core.Managers
 
         public EffectTemplate GetEffectTemplate(uint id, string type)
         {
-            return _effects[type][id];
+            if(_types.ContainsKey(id))
+            {
+                return _effects[type][id];
+            }
+            return null;
+
+            //return _effects[type][id];
         }
 
         public List<uint> GetBuffsByTagId(uint tagId)
@@ -1157,7 +1163,7 @@ namespace AAEmu.Game.Core.Managers
                         {
                             var template = new SpecialEffect();
                             template.Id = reader.GetUInt32("id");
-                            template.SpecialEffectTypeId = (SpecialType)reader.GetInt32("special_effect_type_id");
+                            template.SpecialEffectTypeId = (SpecialEffectType)reader.GetInt32("special_effect_type_id");
                             template.Value1 = reader.GetInt32("value1");
                             template.Value2 = reader.GetInt32("value2");
                             template.Value3 = reader.GetInt32("value3");

@@ -4,8 +4,7 @@
   "SecretKey": "test",
   "Network": {
     "Host": "127.0.0.1",
-    "Port": 1239,
-    "PlayerNumber": 10
+    "Port": 1239
   },
   "StreamNetwork": {
     "Host": "127.0.0.1",
@@ -25,5 +24,6 @@
     }
   },
   "CharacterNameRegex": "^[a-zA-Z0-9а-яА-Я]{1,18}$",
-  "MaxConcurencyThreadPool": 8
+  "MaxConcurencyThreadPool": 8,
+  "HeightMapsEnable": false
 }
