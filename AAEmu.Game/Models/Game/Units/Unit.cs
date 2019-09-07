@@ -8,6 +8,7 @@ using AAEmu.Game.Core.Packets.G2C;
 using AAEmu.Game.Models.Game.Char;
 using AAEmu.Game.Models.Game.Error;
 using AAEmu.Game.Models.Game.Expeditions;
+using AAEmu.Game.Models.Game.NPChar;
 using AAEmu.Game.Models.Game.Skills;
 using AAEmu.Game.Models.Tasks;
 using AAEmu.Game.Models.Tasks.Skills;
@@ -77,45 +78,70 @@ namespace AAEmu.Game.Models.Game.Units
 
         public virtual void ReduceCurrentHp(Unit attacker, int value)
         {
-            //if (Hp <= 0) // не дасть выполнить Dodie
-            //    return;
 
-            Hp = Math.Max(Hp - value, 0);
-            if (Hp <= 0)
+            if (attacker.CurrentTarget is Npc npc)
             {
-                StopRegen();
-                DoDie(attacker);
-                return;
+                if (npc.Hp <= 0) // не дасть выполнить Dodie
+                    return;
+
+                npc.Hp = Math.Max(npc.Hp - value, 0);
+                if (npc.Hp <= 0)
+                {
+                    StopRegen();
+                    DoDie(npc);
+                    return;
+                }
+
+                StartRegen();
+                BroadcastPacket(new SCUnitPointsPacket(npc.ObjId, npc.Hp, npc.Hp > 0 ? npc.Mp : 0), true);
+            }
+            else if (attacker.CurrentTarget is Character character)
+            {
+                if (character.Hp <= 0) // не дасть выполнить Dodie
+                    return;
+
+                character.Hp = Math.Max(character.Hp - value, 0);
+                if (character.Hp <= 0)
+                {
+                    StopRegen();
+                    DoDie(character);
+                    return;
+                }
+
+                StartRegen();
+                BroadcastPacket(new SCUnitPointsPacket(character.ObjId, character.Hp, character.Hp > 0 ? character.Mp : 0), true);
             }
 
-            StartRegen();
-            BroadcastPacket(new SCUnitPointsPacket(ObjId, Hp, Hp > 0 ? Mp : 0), true);
         }
         public virtual void ReduceCurrentMp(Unit attacker, int value)
         {
-            if (Hp <= 0) // если юнит мертв, то не надо менять MP
-                return;
+            //if (Hp <= 0) // если юнит мертв, то не надо менять MP
+            //    return;
 
-            Mp = Math.Max(Mp - value, 0);
-            if (Mp >= MaxMp)
+            attacker.Mp = Math.Max(attacker.Mp - value, 0);
+            if (attacker.Mp >= attacker.MaxMp)
             {
                 //StopRegen(); // нельзя останавливать реген, в этот момент может быть 0 < HP < MaxHp
                 return;
             }
             StartRegen();
-            BroadcastPacket(new SCUnitPointsPacket(ObjId, Hp, Hp > 0 ? Mp : 0), true);
+            BroadcastPacket(new SCUnitPointsPacket(attacker.ObjId, attacker.Hp, attacker.Hp > 0 ? attacker.Mp : 0), true);
         }
 
         public virtual void DoDie(Unit killer)
         {
+            if (killer.CurrentTarget == null)
+            {
+                return;
+            }
             Effects.RemoveEffectsOnDeath();
-            killer.BroadcastPacket(new SCUnitDeathPacket(ObjId, 1, killer), true);
+            killer.BroadcastPacket(new SCUnitDeathPacket(killer.ObjId, 1, killer), true);
 
-            var lootDropItems = ItemManager.Instance.CreateLootDropItems(ObjId);
+            var lootDropItems = ItemManager.Instance.CreateLootDropItems(killer.ObjId);
             if (lootDropItems.Count > 0)
-                killer.BroadcastPacket(new SCLootableStatePacket(ObjId, true), true);
+                killer.BroadcastPacket(new SCLootableStatePacket(killer.ObjId, true), true);
 
-            if (CurrentTarget != null)
+            if (killer.CurrentTarget != null)
             {
                 killer.BroadcastPacket(new SCAiAggroPacket(killer.ObjId, 0), true);
                 killer.SummarizeDamage = 0;
@@ -130,8 +156,11 @@ namespace AAEmu.Game.Models.Game.Units
                     character.StopAutoSkill(character);
                     character.IsInBattle = false; // нам надо, чтобы у персонажа стало "не в бою"
                 }
-                else
-                    killer.StopAutoSkill((Unit)killer.CurrentTarget);
+                else if (killer.CurrentTarget is Character character2)
+                {
+                    character2.StopAutoSkill(character2);
+                    character2.IsInBattle = false; // нам надо, чтобы у персонажа стало "не в бою"
+                }
 
                 killer.CurrentTarget = null;
             }

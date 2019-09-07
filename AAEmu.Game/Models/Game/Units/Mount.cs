@@ -38,7 +38,7 @@ namespace AAEmu.Game.Models.Game.Units
         {
             get
             {
-                var formula = FormulaManager.Instance.GetUnitFormula(FormulaOwnerType.Mate, UnitFormulaKind.Str);
+                var formula = FormulaManager.Instance.GetUnitFormula(UnitOwnerType.Mate, UnitFormulaKind.Str);
                 var parameters = new Dictionary<string, double> { ["level"] = Level };
                 var result = formula.Evaluate(parameters);
                 var res = (int)result;
@@ -61,7 +61,7 @@ namespace AAEmu.Game.Models.Game.Units
         {
             get
             {
-                var formula = FormulaManager.Instance.GetUnitFormula(FormulaOwnerType.Mate, UnitFormulaKind.Dex);
+                var formula = FormulaManager.Instance.GetUnitFormula(UnitOwnerType.Mate, UnitFormulaKind.Dex);
                 var parameters = new Dictionary<string, double> { ["level"] = Level };
                 var res = (int)formula.Evaluate(parameters);
                 //foreach (var item in Inventory.Equip)
@@ -83,7 +83,7 @@ namespace AAEmu.Game.Models.Game.Units
         {
             get
             {
-                var formula = FormulaManager.Instance.GetUnitFormula(FormulaOwnerType.Mate, UnitFormulaKind.Sta);
+                var formula = FormulaManager.Instance.GetUnitFormula(UnitOwnerType.Mate, UnitFormulaKind.Sta);
                 var parameters = new Dictionary<string, double> { ["level"] = Level };
                 var res = (int)formula.Evaluate(parameters);
                 //foreach (var item in Inventory.Equip)
@@ -105,7 +105,7 @@ namespace AAEmu.Game.Models.Game.Units
         {
             get
             {
-                var formula = FormulaManager.Instance.GetUnitFormula(FormulaOwnerType.Mate, UnitFormulaKind.Int);
+                var formula = FormulaManager.Instance.GetUnitFormula(UnitOwnerType.Mate, UnitFormulaKind.Int);
                 var parameters = new Dictionary<string, double> { ["level"] = Level };
                 var res = (int)formula.Evaluate(parameters);
                 //foreach (var item in Inventory.Equip)
@@ -127,7 +127,7 @@ namespace AAEmu.Game.Models.Game.Units
         {
             get
             {
-                var formula = FormulaManager.Instance.GetUnitFormula(FormulaOwnerType.Mate, UnitFormulaKind.Spi);
+                var formula = FormulaManager.Instance.GetUnitFormula(UnitOwnerType.Mate, UnitFormulaKind.Spi);
                 var parameters = new Dictionary<string, double> { ["level"] = Level };
                 var res = (int)formula.Evaluate(parameters);
                 //foreach (var item in Inventory.Equip)
@@ -149,7 +149,7 @@ namespace AAEmu.Game.Models.Game.Units
         {
             get
             {
-                var formula = FormulaManager.Instance.GetUnitFormula(FormulaOwnerType.Mate, UnitFormulaKind.Fai);
+                var formula = FormulaManager.Instance.GetUnitFormula(UnitOwnerType.Mate, UnitFormulaKind.Fai);
                 var parameters = new Dictionary<string, double> { ["level"] = Level };
                 var res = (int)formula.Evaluate(parameters);
                 foreach (var bonus in GetBonuses(UnitAttribute.Fai))
@@ -168,7 +168,7 @@ namespace AAEmu.Game.Models.Game.Units
         {
             get
             {
-                var formula = FormulaManager.Instance.GetUnitFormula(FormulaOwnerType.Mate, UnitFormulaKind.MaxHealth);
+                var formula = FormulaManager.Instance.GetUnitFormula(UnitOwnerType.Mate, UnitFormulaKind.MaxHealth);
                 var parameters = new Dictionary<string, double>
                 {
                     ["level"] = Level,
@@ -196,7 +196,7 @@ namespace AAEmu.Game.Models.Game.Units
         {
             get
             {
-                var formula = FormulaManager.Instance.GetUnitFormula(FormulaOwnerType.Mate, UnitFormulaKind.HealthRegen);
+                var formula = FormulaManager.Instance.GetUnitFormula(UnitOwnerType.Mate, UnitFormulaKind.HealthRegen);
                 var parameters = new Dictionary<string, double>
                 {
                     ["level"] = Level,
@@ -225,7 +225,7 @@ namespace AAEmu.Game.Models.Game.Units
         {
             get
             {
-                var formula = FormulaManager.Instance.GetUnitFormula(FormulaOwnerType.Mate, UnitFormulaKind.PersistentHealthRegen);
+                var formula = FormulaManager.Instance.GetUnitFormula(UnitOwnerType.Mate, UnitFormulaKind.PersistentHealthRegen);
                 var parameters = new Dictionary<string, double>
                 {
                     ["level"] = Level,
@@ -254,7 +254,7 @@ namespace AAEmu.Game.Models.Game.Units
         {
             get
             {
-                var formula = FormulaManager.Instance.GetUnitFormula(FormulaOwnerType.Mate, UnitFormulaKind.MaxMana);
+                var formula = FormulaManager.Instance.GetUnitFormula(UnitOwnerType.Mate, UnitFormulaKind.MaxMana);
                 var parameters = new Dictionary<string, double>
                 {
                     ["level"] = Level,
@@ -282,7 +282,7 @@ namespace AAEmu.Game.Models.Game.Units
         {
             get
             {
-                var formula = FormulaManager.Instance.GetUnitFormula(FormulaOwnerType.Mate, UnitFormulaKind.ManaRegen);
+                var formula = FormulaManager.Instance.GetUnitFormula(UnitOwnerType.Mate, UnitFormulaKind.ManaRegen);
                 var parameters = new Dictionary<string, double>
                 {
                     ["level"] = Level,
@@ -311,7 +311,7 @@ namespace AAEmu.Game.Models.Game.Units
         {
             get
             {
-                var formula = FormulaManager.Instance.GetUnitFormula(FormulaOwnerType.Mate, UnitFormulaKind.PersistentManaRegen);
+                var formula = FormulaManager.Instance.GetUnitFormula(UnitOwnerType.Mate, UnitFormulaKind.PersistentManaRegen);
                 var parameters = new Dictionary<string, double>
                 {
                     ["level"] = Level,

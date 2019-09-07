@@ -5,6 +5,7 @@ using AAEmu.Game.Core.Managers.UnitManagers;
 using AAEmu.Game.Core.Managers.World;
 using AAEmu.Game.Core.Network.Connections;
 using AAEmu.Game.Core.Packets.G2C;
+using AAEmu.Game.Models;
 using AAEmu.Game.Models.Game.Char;
 using AAEmu.Game.Models.Game.Chat;
 using AAEmu.Game.Models.Game.DoodadObj;
@@ -20,7 +21,7 @@ namespace AAEmu.Game.Core.Managers
 {
     public class DuelManager : Singleton<DuelManager>
     {
-        protected static readonly Logger Log = LogManager.GetCurrentClassLogger();
+        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
         private DoodadSpawner _combatFlag;
         private const double Delay = 1000; // 1 sec
@@ -32,15 +33,16 @@ namespace AAEmu.Game.Core.Managers
 
         protected DuelManager()
         {
-        }
-
-        public void Load()
-        {
-            Log.Info("Initialising Duel Manager...");
             _duels = new ConcurrentDictionary<uint, Duel>();
         }
 
-        public void DuelAdd(Duel duel)
+        public bool Initialize()
+        {
+            Log.Info("Initialising Duel Manager...");
+            return true;
+        }
+
+        private void DuelAdd(Duel duel)
         {
             if (!_duels.ContainsKey(duel.Challenger.Id))
                 _duels.TryAdd(duel.Challenger.Id, duel);
@@ -49,7 +51,7 @@ namespace AAEmu.Game.Core.Managers
                 _duels.TryAdd(duel.Challenged.Id, duel);
         }
 
-        public void DuelRemove(Duel duel)
+        private void DuelRemove(Duel duel)
         {
             _duels.TryRemove(duel.Challenger.Id, out _);
             _duels.TryRemove(duel.Challenged.Id, out _);
@@ -87,7 +89,10 @@ namespace AAEmu.Game.Core.Managers
                     };
                     _combatFlag.Position.X = duel.Challenger.Position.X - (duel.Challenger.Position.X - duel.Challenged.Position.X) / 2;
                     _combatFlag.Position.Y = duel.Challenger.Position.Y - (duel.Challenger.Position.Y - duel.Challenged.Position.Y) / 2;
-                    _combatFlag.Position.Z = WorldManager.Instance.GetHeight(_combatFlag.Position.ZoneId, _combatFlag.Position.X, _combatFlag.Position.Y);
+                    _combatFlag.Position.Z = AppConfiguration.Instance.HeightMapsEnable
+                        ? WorldManager.Instance.GetHeight(_combatFlag.Position.ZoneId, _combatFlag.Position.X, _combatFlag.Position.Y)
+                        : duel.Challenger.Position.Z - (duel.Challenger.Position.Z - duel.Challenged.Position.Z) / 2;
+
                     duel.DuelFlag = _combatFlag.Spawn(0); // set CombatFlag
 
                     // make the flag flutter in the wind
@@ -157,7 +162,7 @@ namespace AAEmu.Game.Core.Managers
             }
         }
 
-        public void DuelCleanUp(uint id)
+        private void DuelCleanUp(uint id)
         {
             try
             {

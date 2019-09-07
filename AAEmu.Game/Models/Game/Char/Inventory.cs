@@ -280,6 +280,43 @@ namespace AAEmu.Game.Models.Game.Char
             }
         }
 
+        public void RemoveItem(uint templateId, int count, ItemTaskType taskType, List<ItemTask> tasks = null)
+        {
+            if (tasks == null)
+                tasks = new List<ItemTask>();
+            foreach (var item in Items)
+            {
+                if (item != null && item.TemplateId == templateId)
+                {
+                    var itemCount = item.Count;
+                    var temp = Math.Min(count, itemCount);
+                    item.Count -= temp;
+                    count -= temp;
+                    if (count < 0)
+                        count = 0;
+                    if (item.Count == 0)
+                    {
+                        Items[item.Slot] = null;
+                        ItemIdManager.Instance.ReleaseId((uint)item.Id);
+                        lock (_removedItems)
+                        {
+                            if (!_removedItems.Contains(item.Id))
+                                _removedItems.Add(item.Id);
+                        }
+                        tasks.Add(new ItemRemove(item));
+                    }
+                    else
+                    {
+                        tasks.Add(new ItemCountUpdate(item, -temp));
+                    }
+                    if (count == 0)
+                        break;
+                }
+            }
+            Owner.SendPacket(new SCItemTaskSuccessPacket(taskType, tasks, new List<ulong>()));
+            return;
+        }
+
         public List<(Item Item, int Count)> RemoveItem(uint templateId, int count)
         {
             var res = new List<(Item, int)>();

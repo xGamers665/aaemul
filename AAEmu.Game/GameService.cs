@@ -80,7 +80,7 @@ namespace AAEmu.Game
             HousingManager.Instance.SpawnAll();
 
             AccessLevelManager.Instance.Load();
-            DuelManager.Instance.Load();
+            DuelManager.Instance.Initialize();
 
             ScriptCompiler.Compile();
 

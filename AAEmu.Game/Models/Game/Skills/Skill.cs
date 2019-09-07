@@ -345,7 +345,7 @@ namespace AAEmu.Game.Models.Game.Skills
                         }
                         break;
                     }
-                case SkillTargetType.Building:
+                case SkillTargetType.GeneralUnit:
                     {
                         if (targetCaster.Type == SkillCastTargetType.Unit || targetCaster.Type == SkillCastTargetType.Doodad)
                         {

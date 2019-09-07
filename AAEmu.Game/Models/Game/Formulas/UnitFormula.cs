@@ -1,7 +1,8 @@
-namespace AAEmu.Game.Models.Game.Formulas
+﻿namespace AAEmu.Game.Models.Game.Formulas
 {
-    public enum FormulaOwnerType : byte
+    public enum UnitOwnerType : byte
     {
+        //unit_owner_type
         Character = 0,
         Npc = 1,
         Slave = 2,
@@ -14,6 +15,7 @@ namespace AAEmu.Game.Models.Game.Formulas
     public enum UnitFormulaKind : byte
     {
         // TODO v.1.0
+        //unit_formula_kind
         MeleeCritical = 1,
         MeleeAntiMiss = 2,
         MeleeDodge = 3,
@@ -67,6 +69,6 @@ namespace AAEmu.Game.Models.Game.Formulas
     public class UnitFormula : Formula
     {
         public UnitFormulaKind Kind { get; set; }
-        public FormulaOwnerType Owner { get; set; }
+        public UnitOwnerType Owner { get; set; }
     }
 }

@@ -144,6 +144,7 @@ namespace AAEmu.Game.Models.Game.Skills.Effects
             min = (int)(min * Multiplier);
             max = (int)(max * Multiplier);
             var value = Rand.Next(min, max);
+            
             trg.ReduceCurrentHp(caster, value);
             caster.SummarizeDamage += value;
             trg.BroadcastPacket(new SCUnitDamagedPacket(castObj, casterObj, caster.ObjId, target.ObjId, value), true);

@@ -5,7 +5,6 @@ using AAEmu.Game.Core.Managers;
 using AAEmu.Game.Core.Managers.World;
 using AAEmu.Game.Core.Packets.G2C;
 using AAEmu.Game.Models.Game.Char;
-using AAEmu.Game.Models.Game.Formulas;
 using AAEmu.Game.Models.Game.Items;
 using AAEmu.Game.Models.Game.Items.Actions;
 using AAEmu.Game.Models.Game.Items.Templates;
@@ -26,10 +25,21 @@ namespace AAEmu.Game.Models.Game.Skills.Effects.SpecialEffects
             GreatSuccess = 4
         }
 
-        protected static Logger Log = LogManager.GetCurrentClassLogger();
-
-        public void Execute(Unit caster, SkillCaster casterObj, BaseUnit target, SkillCastTarget targetObj, CastAction castObj, Skill skill, SkillObject skillObject, DateTime time, int value1, int value2, int value3, int value4)
+        private static Logger _log = LogManager.GetCurrentClassLogger();
+        public void Execute(Unit caster,
+            SkillCaster casterObj,
+            BaseUnit target,
+            SkillCastTarget targetObj,
+            CastAction castObj,
+            Skill skill,
+            SkillObject skillObject,
+            DateTime time,
+            int value1,
+            int value2,
+            int value3,
+            int value4)
         {
+            _log.Warn("Special effects: GradeEnchantResult");
             var character = (Character)caster;
             if (character == null) return;
 
@@ -91,11 +101,16 @@ namespace AAEmu.Game.Models.Game.Skills.Effects.SpecialEffects
 
             if (item.Grade >= 8 && (result == GradeEnchantResult.Success || result == GradeEnchantResult.GreatSuccess))
             {
-                WorldManager.Instance.BroadcastPacketToServer(new SCGradeEnchantBroadcastPacket(character.Name, (byte)result, item, initialGrade, item.Grade));
+                WorldManager.Instance.BroadcastPacketToServer(
+                    new SCGradeEnchantBroadcastPacket(character.Name, (byte)result, item, initialGrade, item.Grade));
             }
         }
 
-        private GradeEnchantResult RollRegrade(GradeTemplate gradeTemplate, Item item, bool isLucky, bool useCharm, ItemGradeEnchantingSupport charmInfo)
+        private GradeEnchantResult RollRegrade(GradeTemplate gradeTemplate,
+            Item item,
+            bool isLucky,
+            bool useCharm,
+            ItemGradeEnchantingSupport charmInfo)
         {
             var successRoll = Rand.Next(0, 10000);
             var breakRoll = Rand.Next(0, 10000);
@@ -103,10 +118,20 @@ namespace AAEmu.Game.Models.Game.Skills.Effects.SpecialEffects
             var greatSuccessRoll = Rand.Next(0, 10000);
 
             // TODO : Refactor
-            var successChance = useCharm ? GetCharmChance(gradeTemplate.EnchantSuccessRatio, charmInfo.AddSuccessRatio, charmInfo.AddSuccessMul) : gradeTemplate.EnchantSuccessRatio;
-            var greatSuccessChance = useCharm ? GetCharmChance(gradeTemplate.EnchantGreatSuccessRatio, charmInfo.AddGreatSuccessRatio, charmInfo.AddGreatSuccessMul) : gradeTemplate.EnchantGreatSuccessRatio;
-            var breakChance = useCharm ? GetCharmChance(gradeTemplate.EnchantBreakRatio, charmInfo.AddBreakRatio, charmInfo.AddBreakMul) : gradeTemplate.EnchantBreakRatio;
-            var downgradeChance = useCharm ? GetCharmChance(gradeTemplate.EnchantDowngradeRatio, charmInfo.AddDowngradeRatio, charmInfo.AddDowngradeMul) : gradeTemplate.EnchantDowngradeRatio;
+            var successChance = useCharm
+                ? GetCharmChance(gradeTemplate.EnchantSuccessRatio, charmInfo.AddSuccessRatio, charmInfo.AddSuccessMul)
+                : gradeTemplate.EnchantSuccessRatio;
+            var greatSuccessChance = useCharm
+                ? GetCharmChance(gradeTemplate.EnchantGreatSuccessRatio, charmInfo.AddGreatSuccessRatio,
+                    charmInfo.AddGreatSuccessMul)
+                : gradeTemplate.EnchantGreatSuccessRatio;
+            var breakChance = useCharm
+                ? GetCharmChance(gradeTemplate.EnchantBreakRatio, charmInfo.AddBreakRatio, charmInfo.AddBreakMul)
+                : gradeTemplate.EnchantBreakRatio;
+            var downgradeChance = useCharm
+                ? GetCharmChance(gradeTemplate.EnchantDowngradeRatio, charmInfo.AddDowngradeRatio,
+                    charmInfo.AddDowngradeMul)
+                : gradeTemplate.EnchantDowngradeRatio;
 
             if (successRoll < successChance)
             {
@@ -156,17 +181,17 @@ namespace AAEmu.Game.Models.Game.Skills.Effects.SpecialEffects
             {
                 case 1:
                     var weaponTemplate = (WeaponTemplate)item.Template;
-                    Log.Info(weaponTemplate.HoldableTemplate.SlotTypeId);
+                    _log.Info(weaponTemplate.HoldableTemplate.SlotTypeId);
                     slotTypeId = weaponTemplate.HoldableTemplate.SlotTypeId;
                     break;
                 case 2:
                     var armorTemplate = (ArmorTemplate)item.Template;
-                    Log.Info(armorTemplate.SlotTemplate.SlotTypeId);
+                    _log.Info(armorTemplate.SlotTemplate.SlotTypeId);
                     slotTypeId = armorTemplate.SlotTemplate.SlotTypeId;
                     break;
                 case 24:
                     var accessoryTemplate = (AccessoryTemplate)item.Template;
-                    Log.Info(accessoryTemplate.SlotTemplate.SlotTypeId);
+                    _log.Info(accessoryTemplate.SlotTemplate.SlotTypeId);
                     slotTypeId = accessoryTemplate.SlotTemplate.SlotTypeId;
                     break;
             }
@@ -189,7 +214,8 @@ namespace AAEmu.Game.Models.Game.Skills.Effects.SpecialEffects
             return cost;
         }
 
-        // This is required because XLGames are very smart! Instead of being logical and ordering the item_grades table, they added grade_order column...
+        // This is required because XLGames are very smart! Instead of being logical and ordering the item_grades table,
+        // they added grade_order column...
         private GradeTemplate GetNextGrade(GradeTemplate currentGrade, int gradeChange)
         {
             return ItemManager.Instance.GetGradeTemplateByOrder(currentGrade.GradeOrder + gradeChange);

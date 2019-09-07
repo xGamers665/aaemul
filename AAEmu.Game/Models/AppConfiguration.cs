@@ -19,7 +19,7 @@ namespace AAEmu.Game.Models
         {
             public string Host { get; set; }
             public ushort Port { get; set; }
-            public int PlayerNumber { get; set; }
+            public int NumConnections { get; set; }
         }
 
         public class DBConnections
