@@ -24,8 +24,8 @@ namespace AAEmu.Game
             _log.Info("Starting daemon: AAEmu.Game");
 
             var stopWatch = new Stopwatch();
-            stopWatch.Start();
 
+            stopWatch.Start();
             TaskIdManager.Instance.Initialize();
             TaskManager.Instance.Initialize();
 
@@ -48,7 +48,6 @@ namespace AAEmu.Game
             WorldManager.Instance.Load();
             QuestManager.Instance.Load();
 
-            ShipyardManager.Instance.Load();
             ShipyardManager.Instance.Load();
 
             FormulaManager.Instance.Load();
@@ -80,8 +79,11 @@ namespace AAEmu.Game
             HousingManager.Instance.SpawnAll();
 
             AccessLevelManager.Instance.Load();
-            DuelManager.Instance.Initialize();
+            CashShopManager.Instance.Load();
+            MailManager.Instance.Load();
 
+            DuelManager.Instance.Initialize();
+            
             ScriptCompiler.Compile();
 
             TimeManager.Instance.Start();
@@ -90,9 +92,8 @@ namespace AAEmu.Game
             StreamNetwork.Instance.Start();
             LoginNetwork.Instance.Start();
 
-            CashShopManager.Instance.Load();
-
             stopWatch.Stop();
+
             _log.Info("Server started! Took {0}", stopWatch.Elapsed);
 
             return Task.CompletedTask;
@@ -109,6 +110,7 @@ namespace AAEmu.Game
             LoginNetwork.Instance.Stop();
 
             HousingManager.Instance.Save();
+            MailManager.Instance.Save();
             return Task.CompletedTask;
         }
 

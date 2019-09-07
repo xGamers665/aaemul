@@ -168,6 +168,7 @@ namespace AAEmu.Game.Core.Network.Game
             RegisterPacket(0x09c, 1, typeof(CSReadMailPacket));
             RegisterPacket(0x09d, 1, typeof(CSTakeAttachmentItemPacket));
             RegisterPacket(0x09e, 1, typeof(CSTakeAttachmentMoneyPacket));
+            RegisterPacket(0x09f, 1, typeof(CSTakeAllSelectedAttachmentPacket));
             // 0x9f unk packet
             RegisterPacket(0x0a0, 1, typeof(CSPayChargeMoneyPacket));
             RegisterPacket(0x0a1, 1, typeof(CSDeleteMailPacket));
