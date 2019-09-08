@@ -241,16 +241,16 @@ namespace AAEmu.Game.Core.Managers
                                                   " @item4, @item5, @item6, @item7, @item8, @item9)";
                             command.Prepare();
                             command.Parameters.AddWithValue("@id", mtbs.Value.Item1.Id);
-                            command.Parameters.AddWithValue("@item0", mtbs.Value.Item2.Items[0]);
-                            command.Parameters.AddWithValue("@item1", mtbs.Value.Item2.Items[1]);
-                            command.Parameters.AddWithValue("@item2", mtbs.Value.Item2.Items[2]);
-                            command.Parameters.AddWithValue("@item3", mtbs.Value.Item2.Items[3]);
-                            command.Parameters.AddWithValue("@item4", mtbs.Value.Item2.Items[4]);
-                            command.Parameters.AddWithValue("@item5", mtbs.Value.Item2.Items[5]);
-                            command.Parameters.AddWithValue("@item6", mtbs.Value.Item2.Items[6]);
-                            command.Parameters.AddWithValue("@item7", mtbs.Value.Item2.Items[7]);
-                            command.Parameters.AddWithValue("@item8", mtbs.Value.Item2.Items[8]);
-                            command.Parameters.AddWithValue("@item9", mtbs.Value.Item2.Items[9]);
+                            command.Parameters.AddWithValue("@item0", mtbs.Value.Item2?.Items[0]?.Id ?? 0);
+                            command.Parameters.AddWithValue("@item1", mtbs.Value.Item2?.Items[1]?.Id ?? 0);
+                            command.Parameters.AddWithValue("@item2", mtbs.Value.Item2?.Items[2]?.Id ?? 0);
+                            command.Parameters.AddWithValue("@item3", mtbs.Value.Item2?.Items[3]?.Id ?? 0);
+                            command.Parameters.AddWithValue("@item4", mtbs.Value.Item2?.Items[4]?.Id ?? 0);
+                            command.Parameters.AddWithValue("@item5", mtbs.Value.Item2?.Items[5]?.Id ?? 0);
+                            command.Parameters.AddWithValue("@item6", mtbs.Value.Item2?.Items[6]?.Id ?? 0);
+                            command.Parameters.AddWithValue("@item7", mtbs.Value.Item2?.Items[7]?.Id ?? 0);
+                            command.Parameters.AddWithValue("@item8", mtbs.Value.Item2?.Items[8]?.Id ?? 0);
+                            command.Parameters.AddWithValue("@item9", mtbs.Value.Item2?.Items[9]?.Id ?? 0);  
                             command.ExecuteNonQuery();
                         }
                     }
