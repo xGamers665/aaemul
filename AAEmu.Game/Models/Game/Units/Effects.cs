@@ -324,7 +324,9 @@ namespace AAEmu.Game.Models.Game.Units
                 return;
             }
             foreach (var e in new List<Effect>(_effects))
-                if (e != null && (e.Template is BuffTemplate template && template.RemoveOnDeath || e.Template is BuffEffect effect && effect.Buff.RemoveOnDeath))
+                if (e != null &&
+                    (e.Template is BuffTemplate template && template.RemoveOnDeath ||
+                     e.Template is BuffEffect effect && effect.Buff.RemoveOnDeath))
                 {
                     e.Exit();
                 }
@@ -339,5 +341,30 @@ namespace AAEmu.Game.Models.Game.Units
         {
             return _owner?.Target as BaseUnit;
         }
+
+        public void RemoveStealth()
+        {
+            var own = GetOwner();
+            if (own == null)
+                return;
+
+            foreach (var e in new List<Effect>(_effects))
+                if (e != null &&
+                    (e.Template is BuffTemplate template && template.Stealth ||
+                     e.Template is BuffEffect effect && effect.Buff.Stealth))
+                    e.Exit();
+        }
+        public void RemoveOngoingBuff()
+        {
+            var own = GetOwner();
+            if (own == null)
+                return;
+
+            foreach (var e in new List<Effect>(_effects))
+            {
+                e?.Exit();
+            }
+        }
+
     }
 }

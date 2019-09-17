@@ -34,6 +34,9 @@ namespace AAEmu.Game
 
             ItemIdManager.Instance.Initialize();
             CharacterIdManager.Instance.Initialize();
+
+            LaborPowerManager.Instance.Initialize();
+
             FamilyIdManager.Instance.Initialize();
             ExpeditionIdManager.Instance.Initialize();
             VisitedSubZoneIdManager.Instance.Initialize();

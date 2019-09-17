@@ -1,4 +1,4 @@
-using AAEmu.Commons.Network;
+﻿using AAEmu.Commons.Network;
 using AAEmu.Game.Core.Network.Game;
 using AAEmu.Game.Models.Game.Char;
 using AAEmu.Game.Models.Game.Skills;
@@ -16,6 +16,7 @@ namespace AAEmu.Game.Core.Packets.G2C
 
         public override PacketStream Write(PacketStream stream)
         {
+            _log.Warn("SCBuffCreatedPacket, BuffId: {0}, SkillId: {1}", _effect.Template.BuffId, _effect.Skill?.Template.Id ?? 0);
             stream.Write(_effect.SkillCaster);
             stream.Write((_effect.Caster is Character character) ? character.Id : 0); // casterId
             stream.WriteBc(_effect.Owner.ObjId); // targetBcId

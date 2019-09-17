@@ -23,6 +23,7 @@ namespace AAEmu.Game.Models.Game.Skills.Effects.SpecialEffects
         {
             // TODO caster.Effects.RemoveOngoingBuff();
             _log.Warn("Special effects: CancelOngoingBuff");
+            caster.Effects.RemoveOngoingBuff();
         }
     }
 }

@@ -39,6 +39,7 @@ namespace AAEmu.Game.Models.Game.Char
 
     public enum Gender : byte
     {
+        None = 0,
         Male = 1,
         Female = 2
     }

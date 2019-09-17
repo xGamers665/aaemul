@@ -22,6 +22,7 @@ namespace AAEmu.Game.Models.Game.Skills.Effects.SpecialEffects
         {
             // TODO: add to server
             _log.Warn("Special effects: CancelStealth");
+            caster.Effects.RemoveStealth();
         }
     }
 }
