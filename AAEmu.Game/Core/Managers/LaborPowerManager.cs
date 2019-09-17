@@ -43,6 +43,10 @@ namespace AAEmu.Game.Core.Managers
             {
                 foreach (var character in connection.Characters)
                 {
+                    if (!character.Value.IsOnline)
+                    {
+                        continue;
+                    }
                     if (character.Value.LaborPower >= UpLimit)
                     {
                         _log.Warn("No need to increase Labor Point, since they reached the limit {0} for Char: {1}", UpLimit, character.Value.Name);
