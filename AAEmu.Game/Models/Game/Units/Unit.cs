@@ -8,6 +8,7 @@ using AAEmu.Game.Core.Packets.G2C;
 using AAEmu.Game.Models.Game.Char;
 using AAEmu.Game.Models.Game.Error;
 using AAEmu.Game.Models.Game.Expeditions;
+using AAEmu.Game.Models.Game.Items;
 using AAEmu.Game.Models.Game.NPChar;
 using AAEmu.Game.Models.Game.Skills;
 using AAEmu.Game.Models.Tasks;
@@ -59,6 +60,7 @@ namespace AAEmu.Game.Models.Game.Units
         public ushort TlId { get; set; }
         public GameConnection Connection { get; set; }
         public Dictionary<uint, DateTime> Cooldowns { get; set; }
+        public Item[] Equip { get; set; }
 
 
         /// <summary>
@@ -74,6 +76,8 @@ namespace AAEmu.Game.Models.Game.Units
             Bonuses = new Dictionary<uint, List<Bonus>>();
             Cooldowns = new Dictionary<uint, DateTime>();
             IsInBattle = false;
+            Name = "";
+            Equip = new Item[28];
         }
 
         public virtual void ReduceCurrentHp(Unit attacker, int value)

@@ -16,19 +16,33 @@ namespace AAEmu.Login
         public Task StartAsync(CancellationToken cancellationToken)
         {
             _log.Info("Starting daemon: AAEmu.Login");
-            RequestController.Instance.Initialize();
-            GameController.Instance.Load();
-            LoginNetwork.Instance.Start();
-            InternalNetwork.Instance.Start();
-            return Task.CompletedTask;
+            try
+            {
+                RequestController.Instance.Initialize();
+                GameController.Instance.Load();
+                LoginNetwork.Instance.Start();
+                InternalNetwork.Instance.Start();
+                return Task.CompletedTask;
+            }
+            catch (Exception e)
+            {
+                return Task.FromException(e);
+            }
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
             _log.Info("Stopping daemon.");
-            LoginNetwork.Instance.Stop();
-            InternalNetwork.Instance.Stop();
-            return Task.CompletedTask;
+            try
+            {
+                LoginNetwork.Instance.Stop();
+                InternalNetwork.Instance.Stop();
+                return Task.CompletedTask;
+            }
+            catch (Exception e)
+            {
+                return Task.FromException(e);
+            }
         }
 
         public void Dispose()

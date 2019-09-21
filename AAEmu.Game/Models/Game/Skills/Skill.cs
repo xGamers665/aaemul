@@ -413,6 +413,7 @@ namespace AAEmu.Game.Models.Game.Skills
                 }
                 else if (caster is Character && (Id == 2 || Id == 3 || Id == 4) && !caster.IsAutoAttack)
                 {
+                    caster.IsInBattle = true;
                     caster.IsAutoAttack = true; // enable auto attack
                     caster.SkillId = Id;
                     caster.TlId = TlId;

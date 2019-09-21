@@ -1,4 +1,4 @@
-using AAEmu.Commons.Network;
+﻿using AAEmu.Commons.Network;
 
 namespace AAEmu.Game.Models.Game.Units
 {
@@ -133,23 +133,26 @@ namespace AAEmu.Game.Models.Game.Units
     public class UnitCustomModelParams : PacketMarshaler
     {
         private UnitCustomModelType _type;
-
+        public uint ModelId { get; private set; }
         public uint HairColorId { get; private set; }
         public uint SkinColorId { get; private set; }
-        public uint UnkId { get; private set; } // TODO ...
-
         public FaceModel Face { get; private set; }
 
         public UnitCustomModelParams(UnitCustomModelType type = UnitCustomModelType.None)
         {
             SetType(type);
         }
-
         public UnitCustomModelParams SetType(UnitCustomModelType type)
         {
             _type = type;
             if (_type == UnitCustomModelType.Face)
                 Face = new FaceModel();
+            return this;
+        }
+
+        public UnitCustomModelParams SetModelId(uint modelId)
+        {
+            ModelId = modelId;
             return this;
         }
 
@@ -184,7 +187,7 @@ namespace AAEmu.Game.Models.Game.Units
                 return;
 
             SkinColorId = stream.ReadUInt32();
-            UnkId = stream.ReadUInt32();
+            ModelId = stream.ReadUInt32();
 
             if (_type == UnitCustomModelType.Skin)
                 return;
@@ -204,7 +207,7 @@ namespace AAEmu.Game.Models.Game.Units
                 return stream;
 
             stream.Write(SkinColorId);
-            stream.Write(UnkId);
+            stream.Write(ModelId);
 
             if (_type == UnitCustomModelType.Skin)
                 return stream;

@@ -1,6 +1,6 @@
 ﻿using AAEmu.Game.Core.Packets.G2C;
 using AAEmu.Game.Models.Game.Char;
-using AAEmu.Game.Models.Game.Housing;
+using AAEmu.Game.Models.Game.Items;
 using AAEmu.Game.Models.Game.Units;
 using NLog;
 
@@ -18,6 +18,8 @@ namespace AAEmu.Game.Models.Game.Shipyard
         public Shipyard()
         {
             ModelParams = new UnitCustomModelParams();
+            Name = "";
+            Equip = new Item[28];
         }
 
         public override void AddVisibleObject(Character character)

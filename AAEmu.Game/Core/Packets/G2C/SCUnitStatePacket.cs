@@ -71,22 +71,22 @@ namespace AAEmu.Game.Core.Packets.G2C
             {
                 case 0:
                     var character = (Character)_unit;
-                    stream.Write(character.Id); // type(id)
-                    stream.Write(0L); // v?
+                    stream.Write(character.Id);     // type(id)
+                    stream.Write(0L);               // v?
                     break;
                 case 1:
                     var npc = (Npc)_unit;
                     stream.WriteBc(npc.ObjId);
-                    stream.Write(npc.TemplateId); // npc templateId
-                    stream.Write(0u); // type(id)
-                    stream.Write((byte)0); // clientDriven
+                    stream.Write(npc.TemplateId);   // npc templateId
+                    stream.Write(0u);               // type(id)
+                    stream.Write((byte)0);          // clientDriven
                     break;
                 case 2:
                     var slave = (Slave)_unit;
-                    stream.Write(0u); // type(id)
-                    stream.Write(slave.TlId); // tl
+                    stream.Write(0u);               // type(id)
+                    stream.Write(slave.TlId);       // tl
                     stream.Write(slave.TemplateId); // type(id)
-                    stream.Write(0u); // type(id)
+                    stream.Write(0u);               // type(id)
                     break;
                 case 3:
                     var house = (House)_unit;
@@ -94,24 +94,24 @@ namespace AAEmu.Game.Core.Packets.G2C
                         ? 0
                         : -house.Template.BuildSteps.Count + house.CurrentStep;
 
-                    stream.Write(house.TlId); // tl
+                    stream.Write(house.TlId);       // tl
                     stream.Write(house.TemplateId); // house templateId
                     stream.Write((short)buildStep); // buildstep
                     break;
                 case 4:
                     var transfer = (Transfer)_unit;
-                    stream.Write(transfer.TlId); // tl
+                    stream.Write(transfer.TlId);       // tl
                     stream.Write(transfer.TemplateId); // transfer templateId
                     break;
                 case 5:
                     var mount = (Mount)_unit;
-                    stream.Write(mount.TlId); // tl
+                    stream.Write(mount.TlId);       // tl
                     stream.Write(mount.TemplateId); // npc teplateId
-                    stream.Write(mount.OwnerId); // characterId (masterId)
+                    stream.Write(mount.OwnerId);    // characterId (masterId)
                     break;
                 case 6:
                     var shipyard = (Shipyard)_unit;
-                    stream.Write(shipyard.Template.Id); // type(id)
+                    stream.Write(shipyard.Template.Id);         // type(id)
                     stream.Write(shipyard.Template.TemplateId); // type(id)
                     break;
             }
@@ -128,11 +128,9 @@ namespace AAEmu.Game.Core.Packets.G2C
             stream.Write(_unit.Scale);
             stream.Write(_unit.Level);
             stream.Write(_unit.ModelId); // modelRef
-
-            if (_unit is Character)
+            if (_unit is Character character1)
             {
-                var character = (Character)_unit;
-                foreach (var item in character.Inventory.Equip)
+                foreach (var item in character1.Inventory.Equip)
                 {
                     if (item == null)
                         stream.Write(0);
@@ -140,33 +138,62 @@ namespace AAEmu.Game.Core.Packets.G2C
                         stream.Write(item);
                 }
             }
-            else if (_unit is Npc)
+            else
             {
-                var npc = (Npc)_unit;
-                for (var i = 0; i < npc.Equip.Length; i++)
+                var v4 = 0;
+                do
                 {
-                    var item = npc.Equip[i];
+                    var item = _unit.Equip[v4];
 
-                    if (item is BodyPart)
-                        stream.Write(item.TemplateId);
-                    else if (item != null)
+                    //if (v4 - 19 > 6 || _type == 2)
+                    if (item is BodyPart != true || _type == 2)
                     {
-                        if (i == 27) // Cosplay
-                            stream.Write(item);
-                        else
+                        if (v4 != 27 || _type != 1)
                         {
-                            stream.Write(item.TemplateId);
-                            stream.Write(0L);
-                            stream.Write((byte)0);
+                            switch (_type)  // Item [0..18]
+                            {
+                                case 2:
+                                case 3:
+                                case 5:
+                                    if (item == null)
+                                        stream.Write(0);
+                                    else
+                                        stream.Write(item);
+                                    break;
+                                case 1:
+                                    if (item == null)
+                                        stream.Write(0);
+                                    else
+                                    {
+                                        stream.Write(item.TemplateId);
+                                        if (item.TemplateId != 0)
+                                        {
+                                            stream.Write(0L);
+                                            stream.Write((byte)0);
+                                        }
+                                    }
+
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                        else // Cosplay [27]
+                        {
+                            if (item == null)
+                                stream.Write(0);
+                            else
+                                stream.Write(item);
                         }
                     }
-                    else
-                        stream.Write(0);
-                }
+                    else // somehow_special [19..26]
+                    {
+                        stream.Write(item.TemplateId); // somehow_special (here we derive the parts of the body: face, hair, body)
+                    }
+
+                    v4++;
+                } while (v4 < 28);
             }
-            else
-                for (var i = 0; i < 28; i++)
-                    stream.Write(0);
 
             stream.Write(_unit.ModelParams);
             stream.WriteBc(0);
@@ -178,17 +205,15 @@ namespace AAEmu.Game.Core.Packets.G2C
             //    stream.WriteBc(0);
             //}
 
-            if (_unit is Character)
+            if (_unit is Character character2)
             {
-                var character = (Character)_unit;
-                if (character.Bonding == null)
+                if (character2.Bonding == null)
                     stream.Write((sbyte)-1); // point
                 else
-                    stream.Write(character.Bonding);
+                    stream.Write(character2.Bonding);
             }
-            else if (_unit is Slave)
+            else if (_unit is Slave slave)
             {
-                var slave = (Slave)_unit;
                 if (slave.BondingObjId > 0)
                     stream.WriteBc(slave.BondingObjId);
                 else
@@ -225,51 +250,57 @@ namespace AAEmu.Game.Core.Packets.G2C
                     stream.Write(0f); // pitch
                     stream.Write(0f); // yaw
                     break;
+                default:
+                    break;
             }
 
             stream.Write(_unit.ActiveWeapon);
 
-            if (_unit is Character)
+            if (_unit is Character character3)
             {
-                var character = (Character)_unit;
-                stream.Write((byte)character.Skills.Skills.Count);
-                foreach (var skill in character.Skills.Skills.Values)
+                stream.Write((byte)character3.Skills.Skills.Count);
+                foreach (var skill in character3.Skills.Skills.Values)
                 {
                     stream.Write(skill.Id);
                     stream.Write(skill.Level);
                 }
 
-                stream.Write(character.Skills.PassiveBuffs.Count);
-                foreach (var buff in character.Skills.PassiveBuffs.Values)
+                stream.Write(character3.Skills.PassiveBuffs.Count);
+                foreach (var buff in character3.Skills.PassiveBuffs.Values)
                     stream.Write(buff.Id);
             }
             else
             {
                 stream.Write((byte)0); // learnedSkillCount
-                stream.Write(0); // learnedBuffCount
+                stream.Write(0);       // learnedBuffCount
             }
 
             stream.Write(_unit.Position.RotationX);
             stream.Write(_unit.Position.RotationY);
             stream.Write(_unit.Position.RotationZ);
-            stream.Write(_unit.RaceGender);
 
-            if (_unit is Character)
-                stream.WritePisc(0, 0, ((Character)_unit).Appellations.ActiveAppellation, 0); // pisc
+            if (_unit is Character unit)
+                stream.Write(unit.RaceGender);
+            else if (_unit is Npc npc)
+                stream.Write(npc.RaceGender);
+            else
+                stream.Write(_unit.RaceGender);
+
+            if (_unit is Character character4)
+                stream.WritePisc(0, 0, character4.Appellations.ActiveAppellation, 0); // pisc
             else
                 stream.WritePisc(0, 0, 0, 0); // pisc
 
             stream.WritePisc(_unit.Faction?.Id ?? 0, _unit.Expedition?.Id ?? 0, 0, 0); // pisc
 
-            if (_unit is Character)
+            if (_unit is Character character5)
             {
-                var character = (Character)_unit;
                 var flags = new BitSet(16);
 
-                if (character.Invisible)
+                if (character5.Invisible)
                     flags.Set(5);
 
-                if (character.IdleStatus)
+                if (character5.IdleStatus)
                     flags.Set(13);
 
                 stream.WritePisc(0, 0); // очки чести полученные в PvP, кол-во убийств в PvP
@@ -290,12 +321,10 @@ namespace AAEmu.Game.Core.Packets.G2C
                 stream.Write((ushort)0); // flags
             }
 
-            if (_unit is Character)
+            if (_unit is Character character6)
             {
-                var character = (Character)_unit;
-
-                var activeAbilities = character.Abilities.GetActiveAbilities();
-                foreach (var ability in character.Abilities.Values)
+                var activeAbilities = character6.Abilities.GetActiveAbilities();
+                foreach (var ability in character6.Abilities.Values)
                 {
                     stream.Write(ability.Exp);
                     stream.Write(ability.Order);
@@ -307,7 +336,7 @@ namespace AAEmu.Game.Core.Packets.G2C
 
                 stream.WriteBc(0);
 
-                character.VisualOptions.Write(stream, 31);
+                character6.VisualOptions.Write(stream, 31);
 
                 stream.Write(1); // premium
 

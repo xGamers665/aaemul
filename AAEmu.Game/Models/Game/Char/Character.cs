@@ -714,6 +714,8 @@ namespace AAEmu.Game.Models.Game.Char
         {
             _options = new Dictionary<ushort, string>();
 
+            IsInBattle = false;
+
             ModelParams = modelParams;
             Subscribers = new List<IDisposable>();
         }

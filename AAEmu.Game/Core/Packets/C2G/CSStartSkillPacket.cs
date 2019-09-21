@@ -52,7 +52,6 @@ namespace AAEmu.Game.Core.Packets.C2G
             else if (SkillManager.Instance.IsDefaultSkill(skillId) || SkillManager.Instance.IsCommonSkill(skillId))
             {
                 skill = new Skill(SkillManager.Instance.GetSkillTemplate(skillId)); // TODO переделать...
-                Connection.ActiveChar.IsInBattle = true;
             }
             else if (Connection.ActiveChar.Skills.Skills.ContainsKey(skillId))
             {

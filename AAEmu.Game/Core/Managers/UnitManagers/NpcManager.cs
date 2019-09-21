@@ -35,7 +35,7 @@ namespace AAEmu.Game.Core.Managers.UnitManagers
 
         public MerchantGoods GetGoods(uint id)
         {
-            if(_goods.ContainsKey(id))
+            if (_goods.ContainsKey(id))
                 return _goods[id];
             return null;
         }
@@ -47,14 +47,16 @@ namespace AAEmu.Game.Core.Managers.UnitManagers
 
             var template = _templates[id];
 
-            var npc = new Npc();
-            npc.ObjId = objectId > 0 ? objectId : ObjectIdManager.Instance.GetNextId();
-            npc.TemplateId = id;
-            npc.Template = template;
-            npc.ModelId = template.ModelId;
-            npc.Faction = FactionManager.Instance.GetFaction(template.FactionId);
-            npc.Level = template.Level;
-            npc.Patrol = null;
+            var npc = new Npc
+            {
+                ObjId = objectId > 0 ? objectId : ObjectIdManager.Instance.GetNextId(),
+                TemplateId = id,
+                Template = template,
+                ModelId = template.ModelId,
+                Faction = FactionManager.Instance.GetFaction(template.FactionId),
+                Level = template.Level,
+                Patrol = null
+            };
 
             SetEquipItemTemplate(npc, template.Items.Headgear, EquipmentItemSlot.Head);
             SetEquipItemTemplate(npc, template.Items.Necklace, EquipmentItemSlot.Neck);
@@ -65,25 +67,35 @@ namespace AAEmu.Game.Core.Managers.UnitManagers
             SetEquipItemTemplate(npc, template.Items.Shoes, EquipmentItemSlot.Feet);
             SetEquipItemTemplate(npc, template.Items.Bracelet, EquipmentItemSlot.Arms);
             SetEquipItemTemplate(npc, template.Items.Back, EquipmentItemSlot.Back);
+            // ear_1
+            // ear_2
+            // finger_1
+            // finger_2
             SetEquipItemTemplate(npc, template.Items.Undershirts, EquipmentItemSlot.Undershirt);
             SetEquipItemTemplate(npc, template.Items.Underpants, EquipmentItemSlot.Underpants);
             SetEquipItemTemplate(npc, template.Items.Mainhand, EquipmentItemSlot.Mainhand);
             SetEquipItemTemplate(npc, template.Items.Offhand, EquipmentItemSlot.Offhand);
             SetEquipItemTemplate(npc, template.Items.Ranged, EquipmentItemSlot.Ranged);
             SetEquipItemTemplate(npc, template.Items.Musical, EquipmentItemSlot.Musical);
-            SetEquipItemTemplate(npc, template.Items.Cosplay, EquipmentItemSlot.Cosplay);
 
+            SetEquipItemTemplate(npc, template.BodyItems[0].ItemId, EquipmentItemSlot.Face, 0, template.BodyItems[0].NpcOnly);
             if (template.ModelParams != null)
             {
-                SetEquipItemTemplate(npc, template.HairId, EquipmentItemSlot.Hair);
-                for (var i = 0; i < 7; i++)
-                    SetEquipItemTemplate(npc, template.BodyItems[i], (EquipmentItemSlot) (i + 19));
+                if(template.HairId == 0)
+                    SetEquipItemTemplate(npc, template.BodyItems[1].ItemId, EquipmentItemSlot.Hair, 0, template.BodyItems[1].NpcOnly);
+                else
+                    SetEquipItemTemplate(npc, template.HairId, EquipmentItemSlot.Hair);
             }
-            else if (template.CharRaceId > 0)
-            {
-                for (var i = 0; i < 7; i++)
-                    SetEquipItemTemplate(npc, template.BodyItems[i], (EquipmentItemSlot) (i + 19));
-            }
+            else
+                SetEquipItemTemplate(npc, template.BodyItems[1].ItemId, EquipmentItemSlot.Hair, 0, template.BodyItems[1].NpcOnly);
+
+            SetEquipItemTemplate(npc, template.BodyItems[2].ItemId, EquipmentItemSlot.Glasses, 0, template.BodyItems[2].NpcOnly);
+            SetEquipItemTemplate(npc, template.BodyItems[3].ItemId, EquipmentItemSlot.Reserved, 0, template.BodyItems[3].NpcOnly);
+            SetEquipItemTemplate(npc, template.BodyItems[4].ItemId, EquipmentItemSlot.Tail, 0, template.BodyItems[4].NpcOnly);
+            SetEquipItemTemplate(npc, template.BodyItems[5].ItemId, EquipmentItemSlot.Body, 0, template.BodyItems[5].NpcOnly);
+            SetEquipItemTemplate(npc, template.BodyItems[6].ItemId, EquipmentItemSlot.Beard, 0, template.BodyItems[6].NpcOnly);
+
+            SetEquipItemTemplate(npc, template.Items.Cosplay, EquipmentItemSlot.Cosplay);
 
             foreach (var buffId in template.Buffs)
             {
@@ -285,6 +297,7 @@ namespace AAEmu.Game.Core.Managers.UnitManagers
 
                                             template.ModelParams = new UnitCustomModelParams(UnitCustomModelType.Face);
                                             template.ModelParams
+                                                .SetModelId(reader2.GetUInt32("model_id"))
                                                 .SetHairColorId(reader2.GetUInt32("hair_color_id"))
                                                 .SetSkinColorId(reader2.GetUInt32("skin_color_id"));
 
@@ -324,12 +337,13 @@ namespace AAEmu.Game.Core.Managers.UnitManagers
                                             template.ModelParams.Face.RightPupilColor =
                                                 reader2.GetUInt32("right_pupil_color");
                                             template.ModelParams.Face.EyebrowColor = reader2.GetUInt32("eyebrow_color");
-                                            reader2.GetBytes("modifier", 0, template.ModelParams.Face.Modifier, 0, 128);
                                             template.ModelParams.Face.MovableDecalWeight =
                                                 reader2.GetFloat("face_movable_decal_weight");
                                             template.ModelParams.Face.NormalMapWeight =
                                                 reader2.GetFloat("face_normal_map_weight");
                                             template.ModelParams.Face.DecoColor = reader2.GetUInt32("deco_color");
+
+                                            reader2.GetBytes("modifier", 0, template.ModelParams.Face.Modifier, 0, 128);
                                         }
                                     }
                                 }
@@ -355,24 +369,27 @@ namespace AAEmu.Game.Core.Managers.UnitManagers
                                 }
                             }
 
-                            using (var command2 = connection.CreateCommand())
+                            if (template.ModelId > 0)
                             {
-                                command2.CommandText = "SELECT * FROM item_body_parts WHERE model_id = @model_id";
-                                command2.Prepare();
-                                command2.Parameters.AddWithValue("model_id", template.ModelId);
-                                using (var sqliteReader2 = command2.ExecuteReader())
-                                using (var reader2 = new SQLiteWrapperReader(sqliteReader2))
+                                using (var command2 = connection.CreateCommand())
                                 {
-                                    while (reader2.Read())
+                                    command2.CommandText =
+                                        "SELECT * FROM item_body_parts WHERE model_id = @model_id"; // TODO and npc_only = 1
+                                    command2.Prepare();
+                                    command2.Parameters.AddWithValue("model_id", template.ModelId);
+                                    using (var sqliteReader2 = command2.ExecuteReader())
+                                    using (var reader2 = new SQLiteWrapperReader(sqliteReader2))
                                     {
-                                        var itemId = reader2.GetUInt32("item_id", 0);
-                                        var slot = reader2.GetInt32("slot_type_id") - 23;
-                                        template.BodyItems[slot] = itemId;
+                                        while (reader2.Read())
+                                        {
+                                            var itemId = reader2.GetUInt32("item_id", 0);
+                                            var npcOnly = reader2.GetBoolean("npc_only", true);
+                                            var slot = reader2.GetInt32("slot_type_id") - 23;
+                                            template.BodyItems[slot] = (itemId, npcOnly);
+                                        }
                                     }
                                 }
-                            }
 
-                            if (template.CharRaceId > 0)
                                 using (var command2 = connection.CreateCommand())
                                 {
                                     command2.CommandText =
@@ -389,7 +406,7 @@ namespace AAEmu.Game.Core.Managers.UnitManagers
                                         }
                                     }
                                 }
-
+                            }
                             _templates.Add(template.Id, template);
                         }
                     }
@@ -477,7 +494,7 @@ namespace AAEmu.Game.Core.Managers.UnitManagers
                                 _goods[id].Items[itemId].Add(grade);
                             }
                             else
-                                _goods[id].Items.Add(itemId, new List<byte> {grade});
+                                _goods[id].Items.Add(itemId, new List<byte> { grade });
                         }
                     }
                 }
@@ -486,17 +503,21 @@ namespace AAEmu.Game.Core.Managers.UnitManagers
             }
         }
 
-        private void SetEquipItemTemplate(Npc npc, uint templateId, EquipmentItemSlot slot, byte grade = 0)
+        private void SetEquipItemTemplate(Npc npc, uint templateId, EquipmentItemSlot slot, byte grade = 0, bool npcOnly = false)
         {
+            if (npcOnly && npc.Equip[(int)slot] != null)
+                return;
+
             Item item = null;
             if (templateId > 0)
             {
                 item = ItemManager.Instance.Create(templateId, 1, grade, false);
                 item.SlotType = SlotType.Equipment;
-                item.Slot = (int) slot;
+                item.Slot = (int)slot;
             }
 
-            npc.Equip[(int) slot] = item;
+            npc.Equip[(int)slot] = item;
         }
+
     }
 }
